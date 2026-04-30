@@ -26,6 +26,7 @@ export function Footer() {
   const links = footerLinks[language]
 
   const whatsappLink = "https://wa.me/543517573420"
+  const contactEmail = "info@spanishglobalacademy.com"
 
   return (
     <footer className="border-t border-border/70 bg-background py-10 lg:py-12">
@@ -94,11 +95,11 @@ export function Footer() {
             <h4 className="text-[0.78rem] font-semibold text-primary">{t("footer.contact")}</h4>
             <div className="mt-4 grid gap-3">
               <a
-                href={`mailto:${t("footer.email")}`}
+                href={`mailto:${contactEmail}`}
                 className="flex items-center gap-3 rounded-[0.85rem] bg-[var(--surface-soft)] px-4 py-3 text-[0.78rem] font-semibold text-primary ring-1 ring-border/70 hover:bg-white"
               >
                 <Mail className="h-4 w-4 text-accent" />
-                {t("footer.email")}
+                {contactEmail}
               </a>
 
               <a

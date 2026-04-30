@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useLanguage } from "@/lib/language-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -88,21 +88,32 @@ const paypalButtons: Record<PaypalPlanKey, Record<ServiceLanguage, Record<Curren
   },
 }
 
-const lessonPlans: Record<LessonPlanKey, { name: string; price: string }> = {
+const lessonPlans: Record<
+  LessonPlanKey,
+  {
+    packName: string
+    lessons: string
+    price: string
+  }
+> = {
   starter: {
-    name: "Spanish Academy Starter Pack (2 Lessons)",
+    packName: "Starter Pack",
+    lessons: "2 Lessons",
     price: "65 USD / EUR",
   },
   standard: {
-    name: "Spanish Academy Standard Pack (4 Lessons)",
+    packName: "Standard Pack",
+    lessons: "4 Lessons",
     price: "125 USD / EUR",
   },
   plus: {
-    name: "Spanish Academy Plus Pack (8 Lessons)",
+    packName: "Plus Pack",
+    lessons: "8 Lessons",
     price: "235 USD / EUR",
   },
   premium: {
-    name: "Spanish Academy Premium Pack (10 Lessons)",
+    packName: "Premium Pack",
+    lessons: "10 Lessons",
     price: "280 USD / EUR",
   },
 }
@@ -136,13 +147,24 @@ function getPayPalPaymentUrl(hostedButtonId: string) {
   return `https://www.paypal.com/ncp/payment/${hostedButtonId}`
 }
 
-function PayPalPaymentButton({ hostedButtonId }: { hostedButtonId: string }) {
+function PayPalPaymentButton({
+  hostedButtonId,
+  onPaymentStarted,
+}: {
+  hostedButtonId: string
+  onPaymentStarted: () => void
+}) {
   return (
     <Button
       asChild
       className="interactive-button h-11 w-full rounded-full bg-primary px-7 text-[0.84rem] font-semibold text-white hover:bg-primary/92"
     >
-      <a href={getPayPalPaymentUrl(hostedButtonId)} target="_blank" rel="noopener noreferrer">
+      <a
+        href={getPayPalPaymentUrl(hostedButtonId)}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onPaymentStarted}
+      >
         Pay with PayPal or credit/debit card
         <ArrowRight className="ml-2 h-4 w-4" />
       </a>
@@ -150,10 +172,42 @@ function PayPalPaymentButton({ hostedButtonId }: { hostedButtonId: string }) {
   )
 }
 
+function PaymentConfirmationControl({
+  paymentStarted,
+  paymentConfirmed,
+  onChange,
+}: {
+  paymentStarted: boolean
+  paymentConfirmed: boolean
+  onChange: (checked: boolean) => void
+}) {
+  return (
+    <label
+      className={`mt-4 flex items-start gap-3 rounded-[0.85rem] p-3 text-[0.76rem] leading-[1.5] ring-1 ${
+        paymentStarted
+          ? "bg-[var(--surface-soft)] text-primary ring-border/70"
+          : "bg-white text-muted-foreground ring-border/50 opacity-60"
+      }`}
+    >
+      <input
+        type="checkbox"
+        disabled={!paymentStarted}
+        checked={paymentConfirmed}
+        onChange={(event) => onChange(event.target.checked)}
+        className="mt-1"
+      />
+      <span>I have completed the payment and want to send my request details to Spanish Academy.</span>
+    </label>
+  )
+}
+
 export function ContactForm() {
   const { language, t } = useLanguage()
   const [form, setForm] = useState<IntakeForm>(initialForm)
   const [submitted, setSubmitted] = useState(false)
+  const [paymentStarted, setPaymentStarted] = useState(false)
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false)
+  const contactSectionRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -167,6 +221,11 @@ export function ContactForm() {
       }))
     }
   }, [t])
+
+  useEffect(() => {
+    setPaymentStarted(false)
+    setPaymentConfirmed(false)
+  }, [form.service, form.selectedPlan, form.paymentMethod, form.liveLanguage])
 
   const selectedPlanData =
     form.selectedPlan && form.selectedPlan in lessonPlans
@@ -220,6 +279,38 @@ export function ContactForm() {
     t("form.liveContext.other"),
   ]
 
+  const planOptions: {
+    key: LessonPlanKey
+    packName: string
+    lessons: string
+    price: string
+  }[] = [
+    {
+      key: "starter",
+      packName: "Starter Pack",
+      lessons: "2 Lessons",
+      price: "65 USD / EUR",
+    },
+    {
+      key: "standard",
+      packName: "Standard Pack",
+      lessons: "4 Lessons",
+      price: "125 USD / EUR",
+    },
+    {
+      key: "plus",
+      packName: "Plus Pack",
+      lessons: "8 Lessons",
+      price: "235 USD / EUR",
+    },
+    {
+      key: "premium",
+      packName: "Premium Pack",
+      lessons: "10 Lessons",
+      price: "280 USD / EUR",
+    },
+  ]
+
   const update = <K extends keyof IntakeForm>(key: K, value: IntakeForm[K]) => {
     setForm((current) => ({ ...current, [key]: value }))
   }
@@ -235,14 +326,27 @@ export function ContactForm() {
     })
   }
 
-  const isLive = form.service === t("form.service.live")
+  const isLive =
+    form.service === t("form.service.live") ||
+    form.service === "Real-time interpretation" ||
+    form.service.toLowerCase().includes("interpret")
+
+  const isEnglishLesson = form.service === t("form.service.english") || form.service === "English lessons"
+
+  const selectedServiceLabel = form.service
+
+  const getLessonProductName = (planKey: LessonPlanKey) => {
+    const plan = lessonPlans[planKey]
+    return `${selectedServiceLabel} — ${plan.packName} (${plan.lessons})`
+  }
+
   const paymentCurrency: Currency = form.paymentMethod.includes("EUR") ? "EUR" : "USD"
 
   const serviceLanguage: ServiceLanguage = isLive
     ? form.liveLanguage === t("form.liveLanguage.english") || form.liveLanguage === "English"
       ? "english"
       : "spanish"
-    : form.service === t("form.service.english")
+    : isEnglishLesson
       ? "english"
       : "spanish"
 
@@ -265,13 +369,21 @@ export function ContactForm() {
             : "Spanish Academy Real-Time Spanish Interpretation",
         price: "25 USD / EUR per hour",
       }
-    : selectedPlanData
+    : selectedPlanData && form.selectedPlan in lessonPlans
+      ? {
+          name: getLessonProductName(form.selectedPlan as LessonPlanKey),
+          price: selectedPlanData.price,
+        }
+      : null
+
+  const canSendRequest = Boolean(paymentSummary && paymentConfirmed)
 
   const mailBody = [
     `Service: ${form.service}`,
     paymentSummary ? `Selected product: ${paymentSummary.name}` : null,
     paymentSummary ? `Price: ${paymentSummary.price}` : null,
     paymentSummary ? `Payment method: ${form.paymentMethod}` : null,
+    `Payment confirmation: ${paymentConfirmed ? "Confirmed by student" : "Not confirmed"}`,
     `Full name: ${form.fullName}`,
     `Email: ${form.email}`,
     `Country of residence: ${form.country}`,
@@ -293,12 +405,12 @@ export function ContactForm() {
     .filter(Boolean)
     .join("\n")
 
-  const mailHref = `mailto:spanishacademy100@gmail.com?subject=${encodeURIComponent(
+  const mailHref = `mailto:info@spanishglobalacademy.com?subject=${encodeURIComponent(
     language === "es" ? "SPANISH ACADEMY – FORMULARIO DE INGRESO" : "SPANISH ACADEMY – STUDENT INTAKE FORM",
   )}&body=${encodeURIComponent(mailBody)}`
 
   return (
-    <section id="contact" className="section-pad bg-background">
+    <section id="contact" ref={contactSectionRef} className="section-pad bg-background">
       <div className="section-shell editorial-section">
         <aside>
           <div className="label-rule" />
@@ -316,13 +428,17 @@ export function ContactForm() {
 
               <div>
                 <h3 className="font-serif text-[1.65rem] leading-[1.05] tracking-[-0.045em]">
-                  {t("form.confirmation.title")}
+                  {language === "es" ? "Solicitud enviada correctamente" : "Request sent successfully"}
                 </h3>
                 <p className="mt-3 max-w-[72ch] text-[0.84rem] leading-[1.7] text-muted-foreground">
-                  {t("form.confirmation.body")}
+                  {language === "es"
+                    ? "Gracias. Recibimos tu confirmación de pago y los detalles de tu solicitud. Nuestro equipo se pondrá en contacto para coordinar los próximos pasos."
+                    : "Thank you. We received your payment confirmation and request details. Our team will contact you shortly to coordinate the next steps."}
                 </p>
                 <p className="mt-3 max-w-[72ch] text-[0.84rem] leading-[1.7] text-muted-foreground">
-                  {t("form.confirmation.note")}
+                  {language === "es"
+                    ? "Si tu aplicación de correo no se abrió automáticamente, podés volver a enviar los detalles desde el botón inferior."
+                    : "If your email app did not open automatically, you can send the details again using the button below."}
                 </p>
               </div>
 
@@ -330,15 +446,32 @@ export function ContactForm() {
                 asChild
                 className="h-10 w-fit rounded-full bg-primary px-6 text-[0.78rem] font-semibold text-white hover:bg-primary/92"
               >
-                <a href={mailHref}>{t("form.confirmation.email")}</a>
+                <a href={mailHref}>{language === "es" ? "Enviar detalles nuevamente" : "Send details again"}</a>
               </Button>
             </div>
           ) : (
             <form
               onSubmit={(event) => {
                 event.preventDefault()
+
+                if (!canSendRequest) {
+                  return
+                }
+
                 setSubmitted(true)
-                window.location.href = mailHref
+
+                window.history.replaceState(null, "", "#contact")
+
+                requestAnimationFrame(() => {
+                  contactSectionRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  })
+                })
+
+                setTimeout(() => {
+                  window.location.href = mailHref
+                }, 250)
               }}
               className="space-y-6"
             >
@@ -358,7 +491,13 @@ export function ContactForm() {
                     <button
                       key={service}
                       type="button"
-                      onClick={() => update("service", service)}
+                      onClick={() =>
+                        setForm((current) => ({
+                          ...current,
+                          service,
+                          selectedPlan: service === t("form.service.live") ? "" : current.selectedPlan,
+                        }))
+                      }
                       className={`rounded-[0.85rem] border px-4 py-3 text-left text-[0.8rem] font-semibold ${
                         form.service === service
                           ? "border-primary bg-primary text-white"
@@ -433,16 +572,12 @@ export function ContactForm() {
                     <div className="md:col-span-2">
                       <p className="fine-label">03</p>
                       <h3 className="mt-1 font-serif text-[1.35rem] leading-[1.08] tracking-[-0.04em] text-primary">
-                        {form.service === t("form.service.english")
-                          ? t("form.level.titleEnglish")
-                          : t("form.level.titleSpanish")}
+                        {isEnglishLesson ? t("form.level.titleEnglish") : t("form.level.titleSpanish")}
                       </h3>
                     </div>
 
                     <label className="grid gap-2 text-[0.72rem] font-semibold text-primary">
-                      {form.service === t("form.service.english")
-                        ? t("form.level.subtitleEnglish")
-                        : t("form.level.subtitleSpanish")}
+                      {isEnglishLesson ? t("form.level.subtitleEnglish") : t("form.level.subtitleSpanish")}
 
                       <select
                         value={form.level}
@@ -456,9 +591,7 @@ export function ContactForm() {
                     </label>
 
                     <label className="grid gap-2 text-[0.72rem] font-semibold text-primary">
-                      {form.service === t("form.service.english")
-                        ? t("form.goal.subtitleEnglish")
-                        : t("form.goal.subtitleSpanish")}
+                      {isEnglishLesson ? t("form.goal.subtitleEnglish") : t("form.goal.subtitleSpanish")}
 
                       <select
                         value={form.goal}
@@ -648,63 +781,198 @@ export function ContactForm() {
                 </section>
               )}
 
-              {paymentSummary && (
+              {!isLive ? (
                 <section className="rounded-[1rem] bg-[var(--surface-soft)] p-5 ring-1 ring-border/70">
-                  <p className="fine-label">{isLive ? "05" : "06"}</p>
+                  <p className="fine-label">06</p>
 
                   <h3 className="mt-1 font-serif text-[1.35rem] leading-[1.08] tracking-[-0.04em] text-primary">
-                    Selected plan & payment
+                    Choose a package & payment
                   </h3>
 
-                  <div className="mt-4 grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
-                    <div className="rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
-                      <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-accent">
-                        Selected product
-                      </p>
+                  <p className="mt-2 text-[0.78rem] text-muted-foreground">
+                    You can change your package here before completing the payment.
+                  </p>
 
-                      <p className="mt-2 font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary">
-                        {paymentSummary.name}
-                      </p>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    {planOptions.map((plan) => {
+                      const active = form.selectedPlan === plan.key
 
-                      <p className="mt-3 text-[0.82rem] font-semibold text-muted-foreground">
-                        Price: {paymentSummary.price}
-                      </p>
-                    </div>
+                      return (
+                        <button
+                          key={plan.key}
+                          type="button"
+                          onClick={() => update("selectedPlan", plan.key)}
+                          className={`rounded-[0.95rem] border p-4 text-left transition ${
+                            active
+                              ? "border-primary bg-primary text-white"
+                              : "border-border bg-white text-primary hover:border-primary/40"
+                          }`}
+                        >
+                          <p
+                            className={`text-[0.72rem] font-semibold uppercase tracking-[0.14em] ${
+                              active ? "text-white/80" : "text-accent"
+                            }`}
+                          >
+                            Package
+                          </p>
 
-                    <label className="grid gap-2 rounded-[0.85rem] bg-white p-4 text-[0.72rem] font-semibold text-primary ring-1 ring-border/70">
-                      Payment method
-                      <select
-                        value={form.paymentMethod}
-                        onChange={(event) => update("paymentMethod", event.target.value)}
-                        className="h-10 rounded-md border border-border bg-white px-3 text-[0.82rem] text-primary outline-none"
-                      >
-                        {paymentMethods.map((method) => (
-                          <option key={method}>{method}</option>
-                        ))}
-                      </select>
-                    </label>
+                          <p className="mt-2 font-serif text-[1.1rem] leading-[1.05] tracking-[-0.035em]">
+                            {selectedServiceLabel}
+                            <br />
+                            {plan.packName}
+                          </p>
+
+                          <p className={`mt-1 text-[0.8rem] ${active ? "text-white/80" : "text-muted-foreground"}`}>
+                            ({plan.lessons})
+                          </p>
+
+                          <p className={`mt-4 text-[0.9rem] font-semibold ${active ? "text-white" : "text-primary"}`}>
+                            {plan.price}
+                          </p>
+                        </button>
+                      )
+                    })}
                   </div>
 
-                  {paypalHostedButtonId && (
-                    <div className="mt-5 rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
-                      <p className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-accent">
-                        Secure payment
-                      </p>
+                  {paymentSummary && selectedPlanData ? (
+                    <>
+                      <div className="mt-5 grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
+                        <div className="rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
+                          <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-accent">
+                            Selected product
+                          </p>
 
-                      <PayPalPaymentButton hostedButtonId={paypalHostedButtonId} />
+                          <p className="mt-2 font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary">
+                            {paymentSummary.name}
+                          </p>
 
-                      <p className="mt-3 text-[0.72rem] leading-[1.55] text-muted-foreground">
-                        You can pay with PayPal or with a credit/debit card, depending on PayPal availability in your
-                        country.
-                      </p>
-                    </div>
+                          <p className="mt-3 text-[0.82rem] font-semibold text-muted-foreground">
+                            Price: {paymentSummary.price}
+                          </p>
+
+                          <p className="mt-2 text-[0.74rem] leading-[1.5] text-muted-foreground">
+                            Service: {selectedServiceLabel}
+                          </p>
+                        </div>
+
+                        <label className="grid gap-2 rounded-[0.85rem] bg-white p-4 text-[0.72rem] font-semibold text-primary ring-1 ring-border/70">
+                          Payment method
+                          <select
+                            value={form.paymentMethod}
+                            onChange={(event) => update("paymentMethod", event.target.value)}
+                            className="h-10 rounded-md border border-border bg-white px-3 text-[0.82rem] text-primary outline-none"
+                          >
+                            {paymentMethods.map((method) => (
+                              <option key={method}>{method}</option>
+                            ))}
+                          </select>
+                        </label>
+                      </div>
+
+                      {paypalHostedButtonId && (
+                        <div className="mt-5 rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
+                          <p className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-accent">
+                            Secure payment
+                          </p>
+
+                          <PayPalPaymentButton
+                            hostedButtonId={paypalHostedButtonId}
+                            onPaymentStarted={() => {
+                              setPaymentStarted(true)
+                              setPaymentConfirmed(false)
+                            }}
+                          />
+
+                          <p className="mt-3 text-[0.72rem] leading-[1.55] text-muted-foreground">
+                            You can pay with PayPal or with a credit/debit card, depending on PayPal availability in your
+                            country.
+                          </p>
+
+                          <PaymentConfirmationControl
+                            paymentStarted={paymentStarted}
+                            paymentConfirmed={paymentConfirmed}
+                            onChange={setPaymentConfirmed}
+                          />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <p className="mt-5 rounded-[0.85rem] bg-white p-4 text-[0.76rem] leading-[1.55] text-muted-foreground ring-1 ring-border/70">
+                      Select a package to display the payment option.
+                    </p>
                   )}
                 </section>
+              ) : (
+                paymentSummary && (
+                  <section className="rounded-[1rem] bg-[var(--surface-soft)] p-5 ring-1 ring-border/70">
+                    <p className="fine-label">05</p>
+
+                    <h3 className="mt-1 font-serif text-[1.35rem] leading-[1.08] tracking-[-0.04em] text-primary">
+                      Selected service & payment
+                    </h3>
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-[1.1fr_0.9fr]">
+                      <div className="rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
+                        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-accent">
+                          Selected product
+                        </p>
+
+                        <p className="mt-2 font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary">
+                          {paymentSummary.name}
+                        </p>
+
+                        <p className="mt-3 text-[0.82rem] font-semibold text-muted-foreground">
+                          Price: {paymentSummary.price}
+                        </p>
+                      </div>
+
+                      <label className="grid gap-2 rounded-[0.85rem] bg-white p-4 text-[0.72rem] font-semibold text-primary ring-1 ring-border/70">
+                        Payment method
+                        <select
+                          value={form.paymentMethod}
+                          onChange={(event) => update("paymentMethod", event.target.value)}
+                          className="h-10 rounded-md border border-border bg-white px-3 text-[0.82rem] text-primary outline-none"
+                        >
+                          {paymentMethods.map((method) => (
+                            <option key={method}>{method}</option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    {paypalHostedButtonId && (
+                      <div className="mt-5 rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
+                        <p className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-accent">
+                          Secure payment
+                        </p>
+
+                        <PayPalPaymentButton
+                          hostedButtonId={paypalHostedButtonId}
+                          onPaymentStarted={() => {
+                            setPaymentStarted(true)
+                            setPaymentConfirmed(false)
+                          }}
+                        />
+
+                        <p className="mt-3 text-[0.72rem] leading-[1.55] text-muted-foreground">
+                          You can pay with PayPal or with a credit/debit card, depending on PayPal availability in your
+                          country.
+                        </p>
+
+                        <PaymentConfirmationControl
+                          paymentStarted={paymentStarted}
+                          paymentConfirmed={paymentConfirmed}
+                          onChange={setPaymentConfirmed}
+                        />
+                      </div>
+                    )}
+                  </section>
+                )
               )}
 
               <section className="grid gap-4">
                 <div>
-                  <p className="fine-label">{paymentSummary ? (isLive ? "06" : "07") : "06"}</p>
+                  <p className="fine-label">{isLive ? "06" : "07"}</p>
 
                   <h3 className="mt-1 font-serif text-[1.35rem] leading-[1.08] tracking-[-0.04em] text-primary">
                     {t("form.message.title")}
@@ -725,10 +993,21 @@ export function ContactForm() {
 
               <Button
                 type="submit"
-                className="interactive-button h-11 rounded-full bg-primary px-7 text-[0.84rem] font-semibold text-white hover:bg-primary/92"
+                disabled={!canSendRequest}
+                className="interactive-button h-11 rounded-full bg-primary px-7 text-[0.84rem] font-semibold text-white hover:bg-primary/92 disabled:pointer-events-none disabled:opacity-45"
               >
                 <Mail className="mr-2 h-4 w-4" />
-                {t("form.submit")}
+                {!paymentSummary
+                  ? language === "es"
+                    ? "Seleccioná un paquete primero"
+                    : "Select a package first"
+                  : !paymentConfirmed
+                    ? language === "es"
+                      ? "Completá el pago primero"
+                      : "Complete payment first"
+                    : language === "es"
+                      ? "Confirmar y enviar solicitud"
+                      : "Confirm & send request"}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </form>
