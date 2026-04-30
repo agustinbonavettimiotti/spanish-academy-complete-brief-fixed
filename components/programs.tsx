@@ -5,12 +5,12 @@ import { useLanguage } from "@/lib/language-context"
 import { ArrowRight, Briefcase, Building2, Check, GraduationCap, HeartPulse, Languages, Map, MessageCircle, Scale, Stethoscope } from "lucide-react"
 
 export function Programs() {
-  const { t } = useLanguage()
+  const { language, t } = useLanguage()
 
   const featured = [
     {
       title: t("programs.spanish"),
-      body: t("programs.primaryBody"),
+      body: "Travel and daily situations.",
       image: "/images/mujer1.png",
       icon: MessageCircle,
     },
@@ -21,8 +21,8 @@ export function Programs() {
       icon: Languages,
     },
     {
-      title: t("programs.goal1"),
-      body: t("programs.goalsBody"),
+      title: "Get ready for your international Spanish certification",
+      body: "Prepare for your international Spanish test: DELE, SIELE, CELE and more.",
       image: "/images/travel-culture.png",
       icon: Map,
     },
@@ -62,7 +62,19 @@ export function Programs() {
       <div className="section-shell editorial-section">
         <aside>
           <div className="label-rule" />
-          <h2 className="section-label">{t("programs.label")}</h2>
+
+          <h2 className="section-label">
+            {language === "es" ? (
+              <>
+                Nuestros
+                <br />
+                servicios
+              </>
+            ) : (
+              t("programs.label")
+            )}
+          </h2>
+
           <p className="section-note">{t("programs.body")}</p>
           <a href="#contact" className="small-link mt-5">
             {t("hero.ctaPrimary")}
@@ -73,9 +85,19 @@ export function Programs() {
         <div className="space-y-5">
           <div>
             <h3 className="section-title max-w-[760px]">
-              {t("programs.title").split(",")[0]},
-              <br />
-              {t("programs.title").split(",")[1]}
+              {language === "es" ? (
+                <>
+                  Formación personalizada,
+                  <br />
+                  sin programas estándar
+                </>
+              ) : (
+                <>
+                  Personalized language training,
+                  <br />
+                  without standard programs
+                </>
+              )}
             </h3>
           </div>
 

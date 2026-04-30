@@ -25,6 +25,8 @@ export function Footer() {
   const { language, setLanguage, t } = useLanguage()
   const links = footerLinks[language]
 
+  const whatsappLink = "https://wa.me/543517573420"
+
   return (
     <footer className="border-t border-border/70 bg-background py-10 lg:py-12">
       <div className="section-shell">
@@ -49,7 +51,10 @@ export function Footer() {
                 </span>
               </span>
             </a>
-            <p className="mt-5 max-w-[25ch] text-[0.78rem] leading-[1.62] text-muted-foreground">{t("footer.brand")}</p>
+
+            <p className="mt-5 max-w-[25ch] text-[0.78rem] leading-[1.62] text-muted-foreground">
+              {t("footer.brand")}
+            </p>
           </div>
 
           <div>
@@ -73,7 +78,11 @@ export function Footer() {
                   key={lang}
                   type="button"
                   onClick={() => setLanguage(lang)}
-                  className={`rounded-full px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] ${language === lang ? "bg-primary text-white" : "text-muted-foreground hover:text-primary"}`}
+                  className={`rounded-full px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] ${
+                    language === lang
+                      ? "bg-primary text-white"
+                      : "text-muted-foreground hover:text-primary"
+                  }`}
                 >
                   {lang}
                 </button>
@@ -84,14 +93,23 @@ export function Footer() {
           <div>
             <h4 className="text-[0.78rem] font-semibold text-primary">{t("footer.contact")}</h4>
             <div className="mt-4 grid gap-3">
-              <a href={`mailto:${t("footer.email")}`} className="flex items-center gap-3 rounded-[0.85rem] bg-[var(--surface-soft)] px-4 py-3 text-[0.78rem] font-semibold text-primary ring-1 ring-border/70 hover:bg-white">
+              <a
+                href={`mailto:${t("footer.email")}`}
+                className="flex items-center gap-3 rounded-[0.85rem] bg-[var(--surface-soft)] px-4 py-3 text-[0.78rem] font-semibold text-primary ring-1 ring-border/70 hover:bg-white"
+              >
                 <Mail className="h-4 w-4 text-accent" />
                 {t("footer.email")}
               </a>
-              <div className="flex items-center gap-3 rounded-[0.85rem] bg-[var(--surface-soft)] px-4 py-3 text-[0.78rem] font-semibold text-primary ring-1 ring-border/70">
+
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-[0.85rem] bg-[var(--surface-soft)] px-4 py-3 text-[0.78rem] font-semibold text-primary ring-1 ring-border/70 hover:bg-white"
+              >
                 <MessageCircle className="h-4 w-4 text-accent" />
-                {t("footer.whatsapp")}
-              </div>
+                +54 351 757 3420
+              </a>
             </div>
           </div>
         </div>

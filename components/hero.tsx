@@ -31,13 +31,13 @@ export function Hero() {
               {t("hero.eyebrow")}
             </div>
 
-            <h1 className="max-w-[540px] font-serif text-[3.05rem] font-normal leading-[0.94] tracking-[-0.058em] text-primary sm:text-[4.25rem] lg:max-w-[580px] lg:text-[5.1rem] xl:max-w-[600px] xl:text-[5.55rem]">
+            <h1 className="max-w-[660px] font-serif text-[2.85rem] font-normal leading-[0.96] tracking-[-0.055em] text-primary sm:text-[3.85rem] lg:max-w-[700px] lg:text-[4.45rem] xl:max-w-[720px] xl:text-[4.85rem]">
               {t("hero.headline")}
             </h1>
 
             <div className="mt-6 max-w-[33rem] space-y-2 text-[1.08rem] leading-[1.58] text-[var(--ink-soft)] sm:text-[1.22rem]">
               <p className="font-semibold text-primary">{t("hero.subheadline")}</p>
-              <p>{t("hero.subheadline2")}</p>
+              {t("hero.subheadline2") && <p>{t("hero.subheadline2")}</p>}
             </div>
 
             <p className="mt-5 max-w-[34rem] text-[0.95rem] leading-[1.75] text-muted-foreground sm:text-[1.03rem]">
@@ -71,7 +71,7 @@ export function Hero() {
                 asChild
                 className="interactive-button h-11 rounded-full bg-primary px-7 text-[0.84rem] font-semibold text-white hover:bg-primary/92"
               >
-                <a href="#contact">{t("hero.ctaPrimary")}</a>
+                <a href="#pricing">{t("hero.ctaPrimary")}</a>
               </Button>
 
               <Button

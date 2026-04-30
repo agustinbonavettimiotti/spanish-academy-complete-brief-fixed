@@ -16,7 +16,7 @@ const copy = {
       { label: "Teaching Staff", href: "#teachers", id: "teachers" },
       { label: "FAQ", href: "#faq", id: "faq" },
     ],
-    cta: "Book a free trial lesson",
+    cta: "View plans",
     home: "Spanish Academy home",
     open: "Open menu",
     close: "Close menu",
@@ -30,7 +30,7 @@ const copy = {
       { label: "Staff docente", href: "#teachers", id: "teachers" },
       { label: "FAQ", href: "#faq", id: "faq" },
     ],
-    cta: "Reservar clase gratis",
+    cta: "Ver planes",
     home: "Inicio Spanish Academy",
     open: "Abrir menú",
     close: "Cerrar menú",
@@ -151,7 +151,7 @@ export function Navigation() {
             asChild
             className="interactive-button h-9 rounded-full bg-primary px-5 text-[0.76rem] font-semibold text-white hover:bg-primary/92"
           >
-            <a href="#contact">{t.cta}</a>
+            <a href="#pricing">{t.cta}</a>
           </Button>
         </div>
 
@@ -191,7 +191,7 @@ export function Navigation() {
             asChild
             className="mt-3 h-11 w-full rounded-full bg-primary text-white hover:bg-primary/92"
           >
-            <a href="#contact" onClick={() => setOpen(false)}>
+            <a href="#pricing" onClick={() => setOpen(false)}>
               {t.cta}
             </a>
           </Button>

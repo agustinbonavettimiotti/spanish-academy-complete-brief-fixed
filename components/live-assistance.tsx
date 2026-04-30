@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useLanguage } from "@/lib/language-context"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, CalendarClock, Check, Clock, Languages, MessageCircle, Video } from "lucide-react"
+import { ArrowRight, CalendarClock, Clock, Languages, MessageCircle, Video } from "lucide-react"
 
 export function LiveAssistance() {
   const { t } = useLanguage()
@@ -49,19 +49,26 @@ export function LiveAssistance() {
               quality={98}
             />
             <div className="absolute inset-x-4 bottom-4 rounded-[1rem] border border-white/60 bg-white/82 p-4 text-primary shadow-[0_24px_60px_-44px_rgba(7,52,92,.38)] backdrop-blur-md">
-              <p className="fine-label">{t("live.title")}</p>
-              <p className="mt-2 font-serif text-[1.45rem] leading-[1.05] tracking-[-0.045em]">{t("live.price")}</p>
+              <p className="fine-label">{t("live.label")}</p>
+              <p className="mt-2 font-serif text-[1.45rem] leading-[1.05] tracking-[-0.045em]">
+                {t("live.title")}
+              </p>
             </div>
           </div>
 
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               {services.map(({ title, body, note, icon: Icon }) => (
-                <article key={title} className="rounded-[1rem] border border-border/85 bg-white p-6 shadow-[0_18px_56px_-48px_rgba(7,52,92,.16)]">
+                <article
+                  key={title}
+                  className="rounded-[1rem] border border-border/85 bg-white p-6 shadow-[0_18px_56px_-48px_rgba(7,52,92,.16)]"
+                >
                   <span className="grid size-12 place-items-center rounded-full bg-[var(--icon-surface)] text-primary">
                     <Icon className="h-5 w-5" />
                   </span>
-                  <h3 className="mt-6 font-serif text-[1.45rem] font-normal leading-[1.04] tracking-[-0.05em] text-primary">{title}</h3>
+                  <h3 className="mt-6 font-serif text-[1.45rem] font-normal leading-[1.04] tracking-[-0.05em] text-primary">
+                    {title}
+                  </h3>
                   <p className="mt-4 text-[0.82rem] leading-[1.7] text-muted-foreground">{body}</p>
                   <div className="mt-5 h-px w-10 bg-accent" />
                   <p className="mt-4 text-[0.78rem] leading-[1.6] text-[var(--ink-soft)]">{note}</p>
@@ -78,7 +85,11 @@ export function LiveAssistance() {
                   </div>
                 ))}
               </div>
-              <Button asChild className="interactive-button mt-5 h-10 rounded-full bg-primary px-6 text-[0.78rem] font-semibold text-white hover:bg-primary/92">
+
+              <Button
+                asChild
+                className="interactive-button mt-5 h-10 rounded-full bg-primary px-6 text-[0.78rem] font-semibold text-white hover:bg-primary/92"
+              >
                 <a href="#contact" className="inline-flex items-center gap-2">
                   {t("live.cta")}
                   <ArrowRight className="h-4 w-4" />
