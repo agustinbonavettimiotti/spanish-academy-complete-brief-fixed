@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, CalendarClock, Clock, Languages, MessageCircle, Video } from "lucide-react"
 
 export function LiveAssistance() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   const services = [
     {
@@ -48,6 +48,7 @@ export function LiveAssistance() {
               className="object-cover"
               quality={98}
             />
+
             <div className="absolute inset-x-4 bottom-4 rounded-[1rem] border border-white/60 bg-white/82 p-4 text-primary shadow-[0_24px_60px_-44px_rgba(7,52,92,.38)] backdrop-blur-md">
               <p className="fine-label">{t("live.label")}</p>
               <p className="mt-2 font-serif text-[1.45rem] leading-[1.05] tracking-[-0.045em]">
@@ -66,11 +67,15 @@ export function LiveAssistance() {
                   <span className="grid size-12 place-items-center rounded-full bg-[var(--icon-surface)] text-primary">
                     <Icon className="h-5 w-5" />
                   </span>
+
                   <h3 className="mt-6 font-serif text-[1.45rem] font-normal leading-[1.04] tracking-[-0.05em] text-primary">
                     {title}
                   </h3>
+
                   <p className="mt-4 text-[0.82rem] leading-[1.7] text-muted-foreground">{body}</p>
+
                   <div className="mt-5 h-px w-10 bg-accent" />
+
                   <p className="mt-4 text-[0.78rem] leading-[1.6] text-[var(--ink-soft)]">{note}</p>
                 </article>
               ))}
@@ -79,7 +84,10 @@ export function LiveAssistance() {
             <div className="rounded-[1rem] border border-border/85 bg-[var(--surface-soft)] p-5 shadow-[0_18px_56px_-48px_rgba(7,52,92,.16)]">
               <div className="grid gap-3 md:grid-cols-3">
                 {details.map(({ icon: Icon, text }) => (
-                  <div key={text} className="flex gap-3 rounded-[0.8rem] bg-white p-4 text-primary ring-1 ring-border/60">
+                  <div
+                    key={text}
+                    className="flex gap-3 rounded-[0.8rem] bg-white p-4 text-primary ring-1 ring-border/60"
+                  >
                     <Icon className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
                     <p className="text-[0.77rem] font-semibold leading-[1.45]">{text}</p>
                   </div>
@@ -91,7 +99,7 @@ export function LiveAssistance() {
                 className="interactive-button mt-5 h-10 rounded-full bg-primary px-6 text-[0.78rem] font-semibold text-white hover:bg-primary/92"
               >
                 <a href="#contact" className="inline-flex items-center gap-2">
-                  {t("live.cta")}
+                  {language === "es" ? "Seleccionar un servicio" : "Select a service"}
                   <ArrowRight className="h-4 w-4" />
                 </a>
               </Button>

@@ -51,11 +51,6 @@ export function Teachers() {
                       <dt className="font-semibold text-primary">{t("teachers.native")}</dt>
                       <dd>Español</dd>
                     </div>
-
-                    <div>
-                      <dt className="font-semibold text-primary">{t("teachers.other")}</dt>
-                      <dd>{t("teachers.otherPending")}</dd>
-                    </div>
                   </dl>
                 </div>
               </article>

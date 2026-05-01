@@ -28,7 +28,7 @@ export function Pricing() {
       ),
       price: "65",
       cadence: "EUR",
-      items: ["2 " + t("pricing.lessons"), t("pricing.duration"), t("pricing.free")],
+      items: ["2 " + t("pricing.lessons"), t("pricing.duration")],
       popular: false,
     },
     {
@@ -43,7 +43,7 @@ export function Pricing() {
       ),
       price: "125",
       cadence: "EUR",
-      items: ["4 " + t("pricing.lessons"), t("pricing.duration"), t("pricing.free")],
+      items: ["4 " + t("pricing.lessons"), t("pricing.duration")],
       popular: false,
     },
     {
@@ -58,7 +58,7 @@ export function Pricing() {
       ),
       price: "235",
       cadence: "EUR",
-      items: ["8 " + t("pricing.lessons"), t("pricing.duration"), t("pricing.free")],
+      items: ["8 " + t("pricing.lessons"), t("pricing.duration")],
       popular: true,
     },
     {
@@ -73,7 +73,7 @@ export function Pricing() {
       ),
       price: "280",
       cadence: "EUR",
-      items: ["10 " + t("pricing.lessons"), t("pricing.duration"), t("pricing.free")],
+      items: ["10 " + t("pricing.lessons"), t("pricing.duration")],
       popular: false,
     },
   ]
@@ -86,7 +86,9 @@ export function Pricing() {
         <aside>
           <div className="label-rule" />
           <h2 className="section-label">{t("pricing.label")}</h2>
-          <p className="section-note">{t("pricing.body")}</p>
+          <p className="section-note">
+            Flexible plans tailored to your goals and schedule. All you need to get started is 2 lessons with a certified native-speaking teacher.
+          </p>
         </aside>
 
         <div className="space-y-5">
@@ -107,7 +109,7 @@ export function Pricing() {
               return (
                 <div key={card.price} className="relative overflow-visible pt-7">
                   <article
-                    className={`premium-card interactive-card group relative flex min-h-[420px] flex-col !overflow-visible p-6 ${
+                    className={`premium-card interactive-card group relative flex min-h-[390px] flex-col !overflow-visible p-6 ${
                       card.popular ? "border-accent/70" : ""
                     }`}
                   >
@@ -131,7 +133,7 @@ export function Pricing() {
                         </span>
                       </div>
 
-                      <ul className="mt-4 min-h-[7.3rem] space-y-2.5">
+                      <ul className="mt-4 min-h-[5.4rem] space-y-2.5">
                         {card.items.map((item) => (
                           <li key={item} className="flex gap-2 text-[0.82rem] leading-[1.45] text-muted-foreground">
                             <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
