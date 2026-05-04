@@ -132,7 +132,7 @@ export function Pricing() {
                     }`}
                   >
                     {card.popular && (
-                      <div className="absolute left-1/2 top-0 z-50 w-[72%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent py-1.5 text-center text-[0.7rem] font-semibold text-white shadow-md transition-transform duration-300 group-hover:scale-[1.05]">
+                      <div className="mb-4 w-full rounded-full bg-accent py-1.5 text-center text-[0.7rem] font-semibold text-white shadow-md md:absolute md:left-1/2 md:top-0 md:z-50 md:mb-0 md:w-[72%] md:-translate-x-1/2 md:-translate-y-1/2 md:transition-transform md:duration-300 md:group-hover:scale-[1.05]">
                         {t("pricing.best")}
                       </div>
                     )}
