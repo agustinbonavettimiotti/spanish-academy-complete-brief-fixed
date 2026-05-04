@@ -3,7 +3,7 @@
 import Image from "next/image"
 import { useLanguage } from "@/lib/language-context"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, CheckCircle2, Video } from "lucide-react"
+import { ArrowRight, Video } from "lucide-react"
 
 export function Hero() {
   const { t } = useLanguage()
@@ -44,17 +44,7 @@ export function Hero() {
               {t("hero.supporting")}
             </p>
 
-            <div className="mt-8 grid max-w-[520px] gap-3 sm:grid-cols-2">
-              <div className="flex items-center gap-3 rounded-[1rem] border border-border/80 bg-white/78 px-4 py-3 text-primary shadow-[0_18px_48px_-42px_rgba(7,52,92,.24)] backdrop-blur-md">
-                <CheckCircle2 className="h-4.5 w-4.5 text-accent" />
-                <div>
-                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-accent">
-                    {t("hero.freeLabel")}
-                  </p>
-                  <p className="text-[0.82rem] font-semibold leading-snug">{t("hero.free")}</p>
-                </div>
-              </div>
-
+            <div className="mt-8 grid max-w-[520px] gap-3">
               <div className="flex items-center gap-3 rounded-[1rem] border border-border/80 bg-white/78 px-4 py-3 text-primary shadow-[0_18px_48px_-42px_rgba(7,52,92,.24)] backdrop-blur-md">
                 <Video className="h-4.5 w-4.5 text-accent" />
                 <div>
