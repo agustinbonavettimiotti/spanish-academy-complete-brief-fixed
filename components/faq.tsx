@@ -4,11 +4,16 @@ import { useLanguage } from "@/lib/language-context"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 export function FAQ() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
+
+  const packageAnswer =
+    language === "es"
+      ? "Se debe comprar un mínimo de 2 clases para comenzar."
+      : "A minimum of 2 lessons must be purchased to start."
 
   const items = [
     [t("faq.q1"), t("faq.a1")],
-    [t("faq.q2"), t("faq.a2")],
+    [t("faq.q2"), packageAnswer],
     [t("faq.q3"), t("faq.a3")],
     [t("faq.q4"), t("faq.a4")],
     [t("faq.q5"), t("faq.a5")],

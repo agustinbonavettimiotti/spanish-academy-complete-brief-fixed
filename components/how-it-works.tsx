@@ -10,7 +10,7 @@ export function HowItWorks() {
     { icon: UserRound, title: t("how.step1.title"), body: t("how.step1.body") },
     { icon: CalendarDays, title: t("how.step2.title"), body: t("how.step2.body") },
     { icon: Laptop, title: t("how.step3.title"), body: t("how.step3.body") },
-    { icon: Video, title: t("how.step4.title"), body: t("how.step4.body") },
+    { icon: Video, title: t("how.step4.title"), body: "" },
   ]
 
   return (
@@ -51,9 +51,11 @@ export function HowItWorks() {
                         {title}
                       </h3>
 
-                      <p className="mt-2 max-w-[34ch] text-[0.76rem] leading-[1.55] text-muted-foreground sm:text-[0.78rem] md:mx-auto md:mt-3 md:max-w-[22ch] md:leading-[1.58]">
-                        {body}
-                      </p>
+                      {body ? (
+                        <p className="mt-2 max-w-[34ch] text-[0.76rem] leading-[1.55] text-muted-foreground sm:text-[0.78rem] md:mx-auto md:mt-3 md:max-w-[22ch] md:leading-[1.58]">
+                          {body}
+                        </p>
+                      ) : null}
                     </div>
                   </div>
                 </article>
