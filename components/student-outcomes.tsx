@@ -14,7 +14,7 @@ const content = {
     ],
   },
   es: {
-    label: "Student Outcomes",
+    label: "Resultados de estudiantes",
     cards: [
       { icon: BadgeCheck, title: "Comunicación segura", body: "Expresate naturalmente en situaciones cotidianas." },
       { icon: GraduationCap, title: "Éxito académico", body: "Fortalecé habilidades para estudios y exámenes." },
@@ -35,11 +35,16 @@ export function StudentOutcomes() {
           <div className="label-rule" />
           <h2 className="section-label">{copy.label}</h2>
         </aside>
+
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {copy.cards.map(({ icon: Icon, title, body }) => (
             <article key={title} className="premium-card interactive-card p-5">
               <Icon className="h-4 w-4 text-accent" />
-              <h3 className="mt-4 max-w-[12ch] font-serif text-[1.18rem] font-normal leading-[1.06] tracking-[-0.04em] text-primary">{title}</h3>
+
+              <h3 className="mt-4 max-w-[12ch] font-serif text-[1.18rem] font-normal leading-[1.06] tracking-[-0.04em] text-primary">
+                {title}
+              </h3>
+
               <p className="mt-3 text-[0.8rem] leading-[1.58] text-muted-foreground">{body}</p>
             </article>
           ))}

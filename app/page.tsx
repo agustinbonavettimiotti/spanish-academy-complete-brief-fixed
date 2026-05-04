@@ -11,6 +11,7 @@ import { Teachers } from "@/components/teachers"
 import { ContactForm } from "@/components/contact-form"
 import { FAQ } from "@/components/faq"
 import { StudentOutcomes } from "@/components/student-outcomes"
+import { StudentTestimonials } from "@/components/student-testimonials"
 import { Footer } from "@/components/footer"
 
 export default function Home() {
@@ -29,6 +30,7 @@ export default function Home() {
           <StudentOutcomes />
           <ContactForm />
           <FAQ />
+          <StudentTestimonials />
         </main>
 
         <Footer />

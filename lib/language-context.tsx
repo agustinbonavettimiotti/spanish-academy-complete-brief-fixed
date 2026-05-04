@@ -59,6 +59,8 @@ const translations: Record<Language, Record<string, string>> = {
     "programs.goal1": "Travel and daily situations",
     "programs.goal2": "Professional and corporate environments",
     "programs.goal3": "Prepare for your international Spanish test: DELE, SIELE, CELE and more.",
+    "programs.certificationTitle": "Get ready for your international Spanish certification",
+    "programs.certificationBody": "Prepare for your international Spanish test: DELE, SIELE, CELE and more.",
     "programs.specializedTitle": "Spanish for Your Industry",
     "programs.specializedBody": "Programs designed for specific industries:",
     "programs.specialized1": "IT and technology",
@@ -340,6 +342,8 @@ const translations: Record<Language, Record<string, string>> = {
     "programs.goal1": "Viajes y situaciones cotidianas",
     "programs.goal2": "Entornos profesionales y corporativos",
     "programs.goal3": "Preparación para certificaciones internacionales de español: DELE, SIELE, CELE y más.",
+    "programs.certificationTitle": "Prepárate para tu certificación internacional de español",
+    "programs.certificationBody": "Preparación para exámenes internacionales de español: DELE, SIELE, CELE y más.",
     "programs.specializedTitle": "Español para tu industria",
     "programs.specializedBody": "Programas diseñados para contextos específicos:",
     "programs.specialized1": "Tecnología e IT",
@@ -415,7 +419,7 @@ const translations: Record<Language, Record<string, string>> = {
     "pricing.liveNote3": "Indicar día, franja horaria aproximada y situación a interpretar",
 
     "teachers.label": "Staff docente",
-    "teachers.title": "Meet Some of Our Teachers",
+    "teachers.title": "Conocé a algunos de nuestros profesores",
     "teachers.body":
       "Vamos a mostrar algunos miembros del staff docente. Los perfiles finales se completarán cuando el cliente envíe fotos, nombres y datos.",
     "teachers.country": "País de origen",
@@ -588,8 +592,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLanguage() {
   const context = useContext(LanguageContext)
+
   if (!context) {
     throw new Error("useLanguage must be used within a LanguageProvider")
   }
+
   return context
 }

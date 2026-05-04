@@ -14,12 +14,16 @@ export function LiveAssistance() {
       body: t("live.spanishBody"),
       note: t("live.spanishNote"),
       icon: MessageCircle,
+      href: "/?service=real-time-spanish-interpretation#contact",
+      cta: language === "es" ? "Seleccionar y pagar" : "Select & pay",
     },
     {
       title: t("live.englishTitle"),
       body: t("live.englishBody"),
       note: t("live.englishNote"),
       icon: Languages,
+      href: "/?service=real-time-english-interpretation#contact",
+      cta: language === "es" ? "Seleccionar y pagar" : "Select & pay",
     },
   ]
 
@@ -59,10 +63,10 @@ export function LiveAssistance() {
 
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
-              {services.map(({ title, body, note, icon: Icon }) => (
+              {services.map(({ title, body, note, icon: Icon, href, cta }) => (
                 <article
                   key={title}
-                  className="rounded-[1rem] border border-border/85 bg-white p-6 shadow-[0_18px_56px_-48px_rgba(7,52,92,.16)]"
+                  className="flex min-w-0 flex-col rounded-[1rem] border border-border/85 bg-white p-6 shadow-[0_18px_56px_-48px_rgba(7,52,92,.16)]"
                 >
                   <span className="grid size-12 place-items-center rounded-full bg-[var(--icon-surface)] text-primary">
                     <Icon className="h-5 w-5" />
@@ -77,6 +81,16 @@ export function LiveAssistance() {
                   <div className="mt-5 h-px w-10 bg-accent" />
 
                   <p className="mt-4 text-[0.78rem] leading-[1.6] text-[var(--ink-soft)]">{note}</p>
+
+                  <Button
+                    asChild
+                    className="interactive-button mt-6 h-auto min-h-11 w-full whitespace-normal rounded-full bg-primary px-4 py-3 text-center text-[0.72rem] font-semibold leading-[1.2] text-white hover:bg-primary/92"
+                  >
+                    <a href={href} className="flex w-full min-w-0 items-center justify-center gap-2 text-center">
+                      <span className="min-w-0 whitespace-normal break-words">{cta}</span>
+                      <ArrowRight className="h-4 w-4 shrink-0" />
+                    </a>
+                  </Button>
                 </article>
               ))}
             </div>
@@ -93,16 +107,6 @@ export function LiveAssistance() {
                   </div>
                 ))}
               </div>
-
-              <Button
-                asChild
-                className="interactive-button mt-5 h-10 rounded-full bg-primary px-6 text-[0.78rem] font-semibold text-white hover:bg-primary/92"
-              >
-                <a href="#contact" className="inline-flex items-center gap-2">
-                  {language === "es" ? "Seleccionar un servicio" : "Select a service"}
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </Button>
             </div>
           </div>
         </div>

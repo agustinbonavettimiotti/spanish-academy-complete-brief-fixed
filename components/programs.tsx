@@ -5,7 +5,7 @@ import { useLanguage } from "@/lib/language-context"
 import { ArrowRight, Briefcase, Building2, Check, GraduationCap, HeartPulse, Languages, Map, MessageCircle, Scale, Stethoscope } from "lucide-react"
 
 export function Programs() {
-  const { language, t } = useLanguage()
+  const { t, language } = useLanguage()
 
   const featured = [
     {
@@ -21,8 +21,8 @@ export function Programs() {
       icon: Languages,
     },
     {
-      title: "Get ready for your international Spanish certification",
-      body: "Prepare for your international Spanish test: DELE, SIELE, CELE and more.",
+      title: t("programs.certificationTitle"),
+      body: t("programs.certificationBody"),
       image: "/images/travel-culture.png",
       icon: Map,
     },
@@ -62,7 +62,6 @@ export function Programs() {
       <div className="section-shell editorial-section">
         <aside>
           <div className="label-rule" />
-
           <h2 className="section-label">
             {language === "es" ? (
               <>
@@ -74,7 +73,6 @@ export function Programs() {
               t("programs.label")
             )}
           </h2>
-
           <p className="section-note">{t("programs.body")}</p>
           <a href="#contact" className="small-link mt-5">
             {t("hero.ctaPrimary")}
@@ -85,19 +83,9 @@ export function Programs() {
         <div className="space-y-5">
           <div>
             <h3 className="section-title max-w-[760px]">
-              {language === "es" ? (
-                <>
-                  Formación personalizada,
-                  <br />
-                  sin programas estándar
-                </>
-              ) : (
-                <>
-                  Personalized language training,
-                  <br />
-                  without standard programs
-                </>
-              )}
+              {t("programs.title").split(",")[0]},
+              <br />
+              {t("programs.title").split(",")[1]}
             </h3>
           </div>
 

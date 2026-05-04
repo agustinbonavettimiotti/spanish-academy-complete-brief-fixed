@@ -19,23 +19,28 @@ export function FAQ() {
   ]
 
   return (
-    <section id="faq" className="bg-background py-10 lg:py-12">
-      <div className="section-shell grid gap-5 lg:grid-cols-[160px_1fr] lg:gap-8">
-        <aside>
+    <section id="faq" className="bg-background py-7 sm:py-9 lg:py-10">
+      <div className="section-shell grid min-w-0 gap-5 lg:grid-cols-[minmax(160px,220px)_minmax(0,1fr)] lg:gap-8">
+        <aside className="min-w-0">
           <div className="label-rule" />
-          <h2 className="font-serif text-[1.8rem] font-normal leading-none tracking-[-0.045em] text-primary">{t("faq.label")}</h2>
+          <h2 className="section-label">{t("faq.label")}</h2>
         </aside>
 
-        <Accordion type="single" collapsible className="grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {items.map(([question, answer]) => (
+        <Accordion
+          type="single"
+          collapsible
+          className="grid min-w-0 items-start gap-3 sm:grid-cols-2 xl:grid-cols-3"
+        >
+          {items.map(([question, answer], index) => (
             <AccordionItem
-              key={question}
-              value={question}
-              className="overflow-hidden rounded-[0.72rem] border border-border/90 bg-white px-4 shadow-[0_12px_40px_-34px_rgba(7,52,92,.14)] transition-all duration-300 data-[state=open]:bg-[var(--surface-soft)] data-[state=open]:shadow-[0_22px_58px_-42px_rgba(7,52,92,.22)]"
+              key={`${question}-${index}`}
+              value={`faq-${index}`}
+              className="min-w-0 overflow-hidden rounded-[0.72rem] border border-border/90 bg-white px-4 shadow-[0_12px_40px_-34px_rgba(7,52,92,.14)] transition-all duration-300 data-[state=open]:shadow-[0_22px_58px_-42px_rgba(7,52,92,.22)]"
             >
-              <AccordionTrigger className="min-h-[60px] py-3 text-left text-[0.76rem] font-semibold leading-snug text-primary hover:no-underline">
-                {question}
+              <AccordionTrigger className="min-h-[58px] py-3 text-left text-[0.76rem] font-semibold leading-snug text-primary hover:no-underline [&>svg]:h-4 [&>svg]:w-4 [&>svg]:shrink-0 [&>svg]:text-muted-foreground">
+                <span className="min-w-0 break-words pr-2">{question}</span>
               </AccordionTrigger>
+
               <AccordionContent className="pb-4 text-[0.76rem] leading-[1.58] text-muted-foreground">
                 {answer}
               </AccordionContent>

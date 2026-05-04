@@ -19,7 +19,7 @@ export function Teachers() {
       <div className="section-shell editorial-section">
         <aside>
           <div className="label-rule" />
-          <h2 className="section-label">Meet Some of Our Teachers</h2>
+          <h2 className="section-label">{t("teachers.title")}</h2>
           <p className="section-note">{t("teachers.body")}</p>
         </aside>
 
