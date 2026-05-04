@@ -30,6 +30,7 @@ type IntakeForm = {
   lessonPlatform: string
   liveLanguage: string
   liveContext: string
+  liveServiceCountry: string
   liveDetails: string
   liveDate: string
   liveTime: string
@@ -201,6 +202,7 @@ const initialForm: IntakeForm = {
   lessonPlatform: "Google Meet",
   liveLanguage: "Spanish",
   liveContext: "Daily tasks",
+  liveServiceCountry: "",
   liveDetails: "",
   liveDate: "",
   liveTime: "",
@@ -247,6 +249,11 @@ function parseTime(time: string) {
 
 function getCountryOption(countryName: string) {
   return countryOptions.find((option) => option.country.toLowerCase() === countryName.trim().toLowerCase())
+}
+
+function getPrimaryTimeZoneForCountry(countryName: string) {
+  const country = getCountryOption(countryName)
+  return country?.timeZones[0] || ""
 }
 
 function getCleanTimeBlockLabel(label: string) {
@@ -737,12 +744,16 @@ export function ContactForm() {
           .join("; ")
       : "Not provided"
 
+  const liveServiceTimeZone = isLive
+    ? getPrimaryTimeZoneForCountry(form.liveServiceCountry) || form.timeZone
+    : form.timeZone
+
   const argentinaTimeText = (() => {
     if (isLive) {
-      if (!form.liveDate || !form.liveTime || !form.timeZone) return "Not provided"
+      if (!form.liveDate || !form.liveTime || !liveServiceTimeZone) return "Not provided"
 
       const [year, month, day] = form.liveDate.split("-").map(Number)
-      const liveUtc = zonedTimeToUtc(year, month, day, form.liveTime, form.timeZone)
+      const liveUtc = zonedTimeToUtc(year, month, day, form.liveTime, liveServiceTimeZone)
       const argentinaTime = formatDateTimeInTimeZone(liveUtc, argentinaTimeZone, language)
 
       return `${argentinaTime.weekday} ${argentinaTime.time}`
@@ -782,6 +793,9 @@ export function ContactForm() {
     `Full name: ${form.fullName}`,
     `Email: ${form.email}`,
     `Country of residence: ${form.country || "Not provided"}`,
+    isLive
+      ? `Country where the interpretation service will be delivered: ${form.liveServiceCountry || "Not provided"}`
+      : null,
     `Phone number: ${form.phone || "Not provided"}`,
     `Level: ${isLive ? "Not applicable" : form.level}`,
     `Learning goal: ${isLive ? form.liveContext : form.goal}`,
@@ -1148,7 +1162,10 @@ export function ContactForm() {
                       <div className="mt-4 grid min-w-0 gap-2">
                         {selectedDayRows.length > 0 ? (
                           selectedDayRows.map((day) => (
-                            <label key={day.key} className="grid min-w-0 gap-1.5 text-[0.72rem] font-semibold text-primary">
+                            <label
+                              key={day.key}
+                              className="grid min-w-0 gap-1.5 text-[0.72rem] font-semibold text-primary"
+                            >
                               {day.label}
                               <select
                                 value={form.availabilityByDay[day.key] || ""}
@@ -1249,6 +1266,34 @@ export function ContactForm() {
                         <option key={context}>{context}</option>
                       ))}
                     </select>
+                  </label>
+
+                  <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary md:col-span-2">
+                    {language === "es"
+                      ? "País donde se prestará el servicio de interpretación"
+                      : "Country where the interpretation service will be delivered"}
+
+                    <select
+                      value={form.liveServiceCountry}
+                      onChange={(event) => update("liveServiceCountry", event.target.value)}
+                      className="h-10 min-w-0 rounded-md border border-border bg-white px-3 text-[0.82rem] text-primary outline-none"
+                    >
+                      <option value="">
+                        {language === "es" ? "Seleccionar país" : "Select country"}
+                      </option>
+
+                      {countryOptions.map((option) => (
+                        <option key={option.country} value={option.country}>
+                          {option.country}
+                        </option>
+                      ))}
+                    </select>
+
+                    <span className="text-[0.7rem] font-normal leading-[1.45] text-muted-foreground">
+                      {language === "es"
+                        ? "Indicá el país donde se prestará el servicio de interpretación, aunque la persona viva en otro país."
+                        : "Indicate the country where the interpretation service will be delivered, even if the person lives in another country."}
+                    </span>
                   </label>
 
                   <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary md:col-span-2">
