@@ -180,14 +180,14 @@ const lessonPlans: Record<LessonPlanKey, { name: string; price: string; lessonCo
   },
 }
 
-const paymentMethods = ["PayPal or card"]
+const paymentMethodLabel = "PayPal / Apple Pay / credit/debit card"
 const paymentCurrencies: Currency[] = ["USD", "EUR"]
 const lessonPlatforms = ["Google Meet", "Zoom"]
 
 const initialForm: IntakeForm = {
   service: "Spanish lessons",
   selectedPlan: "",
-  paymentMethod: "PayPal or card",
+  paymentMethod: paymentMethodLabel,
   paymentCurrency: "USD",
   fullName: "",
   email: "",
@@ -412,11 +412,13 @@ export function ContactForm() {
     paymentMethod: language === "es" ? "Método de pago" : "Payment method",
     securePayment: language === "es" ? "Pago seguro" : "Secure payment",
     paymentButton:
-      language === "es" ? "Pagar con PayPal o tarjeta de crédito/débito" : "Pay with PayPal or credit/debit card",
+      language === "es"
+        ? "Pagar con PayPal / Apple Pay / tarjeta de crédito/débito"
+        : "Pay with PayPal / Apple Pay / credit/debit card",
     paymentNote:
       language === "es"
-        ? "Podés pagar con PayPal o con tarjeta de crédito/débito, según la disponibilidad de PayPal en tu país."
-        : "You can pay with PayPal or with a credit/debit card, depending on PayPal availability in your country.",
+        ? "Podés pagar con PayPal, Apple Pay o tarjeta de crédito/débito, según la disponibilidad de PayPal en tu país."
+        : "You can pay with PayPal, Apple Pay, or a credit/debit card, depending on PayPal availability in your country.",
     paymentConfirmation:
       language === "es"
         ? "Confirmo que ya completé el pago y quiero enviar mis datos a Spanish Academy."
@@ -1457,23 +1459,13 @@ export function ContactForm() {
                         </div>
 
                         <div className="grid min-w-0 gap-3 rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
-                          <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary">
+                          <div className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary">
                             {paymentCopy.paymentMethod}
-                            <select
-                              value={form.paymentMethod}
-                              onChange={(event) => {
-                                resetPaymentConfirmation()
-                                update("paymentMethod", event.target.value)
-                              }}
-                              className="h-10 min-w-0 rounded-md border border-border bg-white px-3 text-[0.82rem] text-primary outline-none"
-                            >
-                              {paymentMethods.map((method) => (
-                                <option key={method} value={method}>
-                                  {method}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
+
+                            <div className="flex min-h-10 min-w-0 items-center rounded-md border border-border bg-white px-3 text-[0.82rem] font-semibold text-primary">
+                              {paymentMethodLabel}
+                            </div>
+                          </div>
 
                           <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary">
                             {language === "es" ? "Moneda" : "Currency"}
@@ -1565,23 +1557,13 @@ export function ContactForm() {
                       </div>
 
                       <div className="grid min-w-0 gap-3 rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
-                        <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary">
+                        <div className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary">
                           {paymentCopy.paymentMethod}
-                          <select
-                            value={form.paymentMethod}
-                            onChange={(event) => {
-                              resetPaymentConfirmation()
-                              update("paymentMethod", event.target.value)
-                            }}
-                            className="h-10 min-w-0 rounded-md border border-border bg-white px-3 text-[0.82rem] text-primary outline-none"
-                          >
-                            {paymentMethods.map((method) => (
-                              <option key={method} value={method}>
-                                {method}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
+
+                          <div className="flex min-h-10 min-w-0 items-center rounded-md border border-border bg-white px-3 text-[0.82rem] font-semibold text-primary">
+                            {paymentMethodLabel}
+                          </div>
+                        </div>
 
                         <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary">
                           {language === "es" ? "Moneda" : "Currency"}
