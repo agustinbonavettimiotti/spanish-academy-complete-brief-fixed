@@ -802,15 +802,23 @@ export function ContactForm() {
     `Specific goal: ${isLive ? form.liveDetails || "Not provided" : form.specificGoal || "Not provided"}`,
     `Available days: ${availableDaysText}`,
     `Available time: ${availableTimeText}`,
-    `Exact times: ${isLive ? form.liveFormat || "Not provided" : form.exactTime || "Not provided"}`,
+    isLive
+      ? `${language === "es" ? "Formato preferido" : "Preferred format"}: ${form.liveFormat || "Not provided"}`
+      : `Exact times: ${form.exactTime || "Not provided"}`,
     `Optional message: ${form.message || "Not provided"}`,
     `ARG: ${argentinaTimeText}`,
   ]
     .filter((item): item is string => item !== null)
     .join("\n")
 
+  const emailSubject = isLive
+    ? language === "es"
+      ? "Interpretación en Tiempo Real — Formulario de Solicitud"
+      : "Real-Time Interpretation Services — Request Form"
+    : "SPANISH ACADEMY – STUDENT INTAKE FORM"
+
   const mailHref = `mailto:info@spanishglobalacademy.com?subject=${encodeURIComponent(
-    "SPANISH ACADEMY – STUDENT INTAKE FORM",
+    emailSubject,
   )}&body=${encodeURIComponent(mailBody)}`
 
   const canSubmit = Boolean(paymentSummary) && paymentConfirmed
@@ -822,7 +830,29 @@ export function ContactForm() {
           <div className="label-rule" />
 
           <h2 className="section-label">
-            {language === "en" ? (
+            {isLive ? (
+              language === "es" ? (
+                <>
+                  Interpretación en
+                  <br />
+                  Tiempo Real —
+                  <br />
+                  Formulario de
+                  <br />
+                  Solicitud
+                </>
+              ) : (
+                <>
+                  Real-Time
+                  <br />
+                  Interpretation
+                  <br />
+                  Services —
+                  <br />
+                  Request Form
+                </>
+              )
+            ) : language === "en" ? (
               <>
                 Student
                 <br />
