@@ -3,10 +3,10 @@
 import Image from "next/image"
 import { useLanguage } from "@/lib/language-context"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Video } from "lucide-react"
+import { ArrowRight, CreditCard, Video } from "lucide-react"
 
 export function Hero() {
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
 
   return (
     <section id="home" className="relative isolate overflow-hidden bg-background pt-[58px]">
@@ -52,6 +52,25 @@ export function Hero() {
                     {t("hero.onlineLabel")}
                   </p>
                   <p className="text-[0.82rem] font-semibold leading-snug">{t("hero.online")}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-[1rem] border border-border/80 bg-white/78 px-4 py-3 text-primary shadow-[0_18px_48px_-42px_rgba(7,52,92,.24)] backdrop-blur-md">
+                <CreditCard className="h-4.5 w-4.5 shrink-0 text-accent" />
+                <div>
+                  <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-accent">
+                    {language === "es" ? "Pagos" : "Payments"}
+                  </p>
+
+                  {language === "es" ? (
+                    <p className="text-[0.82rem] font-semibold leading-snug">
+                      Todos nuestros servicios se pueden abonar con PayPal Apple Pay tarjeta de débito/crédito y Binance (USDT)
+                    </p>
+                  ) : (
+                    <p className="text-[0.82rem] font-semibold leading-snug">
+                      All our services are payable via PayPal Apple Pay debit/credit card and Binance (USDT)
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useEffect, useMemo, useState } from "react"
 import { useLanguage } from "@/lib/language-context"
 import { Button } from "@/components/ui/button"
@@ -7,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ArrowRight, CheckCircle2, Mail } from "lucide-react"
 
-type Currency = "USD" | "EUR"
+type Currency = "USD" | "EUR" | "USDT"
+type PaypalCurrency = Exclude<Currency, "USDT">
 type ServiceLanguage = "spanish" | "english"
 type LessonPlanKey = "starter" | "standard" | "plus" | "premium"
 type PaypalPlanKey = LessonPlanKey | "interpretation"
@@ -37,8 +39,6 @@ type IntakeForm = {
   liveFormat: string
   message: string
 }
-
-const argentinaTimeZone = "America/Argentina/Buenos_Aires"
 
 const countryOptions = [
   { country: "Argentina", timeZones: ["America/Argentina/Buenos_Aires"] },
@@ -104,7 +104,7 @@ const countryOptions = [
 
 const allTimeZones = Array.from(new Set(countryOptions.flatMap((country) => country.timeZones))).sort()
 
-const paypalButtons: Record<PaypalPlanKey, Record<ServiceLanguage, Record<Currency, string>>> = {
+const paypalButtons: Record<PaypalPlanKey, Record<ServiceLanguage, Record<PaypalCurrency, string>>> = {
   starter: {
     spanish: {
       USD: "3QFV5JYW939CE",
@@ -180,9 +180,55 @@ const lessonPlans: Record<LessonPlanKey, { name: string; price: string; lessonCo
   },
 }
 
-const paymentMethodLabel = "PayPal / Apple Pay / credit/debit card"
-const paymentCurrencies: Currency[] = ["USD", "EUR"]
+const paymentMethodLabel = "PayPal checkout / Apple Pay / credit/debit card / Binance (USDT)"
+const paymentCurrencies: Currency[] = ["USD", "EUR", "USDT"]
 const lessonPlatforms = ["Google Meet", "Zoom"]
+
+const binanceQrImages: Record<PaypalPlanKey, Record<ServiceLanguage, string>> = {
+  starter: {
+    spanish: "/images/payments/binance-usdt/starter-pack-spanish-2-lessons.png",
+    english: "/images/payments/binance-usdt/starter-pack-english-2-lessons.png",
+  },
+  standard: {
+    spanish: "/images/payments/binance-usdt/standard-pack-spanish-4-lessons.png",
+    english: "/images/payments/binance-usdt/standard-pack-english-4-lessons.png",
+  },
+  plus: {
+    spanish: "/images/payments/binance-usdt/plus-pack-spanish-8-lessons.png",
+    english: "/images/payments/binance-usdt/plus-pack-english-8-lessons.png",
+  },
+  premium: {
+    spanish: "/images/payments/binance-usdt/premium-pack-spanish-10-lessons.png",
+    english: "/images/payments/binance-usdt/premium-pack-english-10-lessons.png",
+  },
+  interpretation: {
+    spanish: "/images/payments/binance-usdt/spanish-interpreter-1-hour.png",
+    english: "/images/payments/binance-usdt/english-interpreter-1-hour.png",
+  },
+}
+
+const binancePaymentLinks: Record<PaypalPlanKey, Record<ServiceLanguage, string>> = {
+  starter: {
+    spanish: "https://app.binance.com/uni-qr/PHRHH7N7",
+    english: "https://app.binance.com/uni-qr/FiLMRb8N",
+  },
+  standard: {
+    spanish: "https://app.binance.com/uni-qr/Xg518aC1",
+    english: "https://app.binance.com/uni-qr/uu9B6asi",
+  },
+  plus: {
+    spanish: "https://app.binance.com/uni-qr/HvroK5gJ",
+    english: "https://app.binance.com/uni-qr/GcnpesB2",
+  },
+  premium: {
+    spanish: "https://app.binance.com/uni-qr/MN1TLu4f",
+    english: "https://app.binance.com/uni-qr/9KHtVQMV",
+  },
+  interpretation: {
+    spanish: "https://app.binance.com/uni-qr/JackqU27",
+    english: "https://app.binance.com/uni-qr/AX1676J1",
+  },
+}
 
 const initialForm: IntakeForm = {
   service: "Spanish lessons",
@@ -242,18 +288,8 @@ function PayPalPaymentButton({
   )
 }
 
-function parseTime(time: string) {
-  const [hours, minutes] = time.split(":").map(Number)
-  return { hours, minutes }
-}
-
 function getCountryOption(countryName: string) {
   return countryOptions.find((option) => option.country.toLowerCase() === countryName.trim().toLowerCase())
-}
-
-function getPrimaryTimeZoneForCountry(countryName: string) {
-  const country = getCountryOption(countryName)
-  return country?.timeZones[0] || ""
 }
 
 function getCleanTimeBlockLabel(label: string) {
@@ -264,130 +300,57 @@ function formatPrice(price: string, currency: Currency) {
   return price.replace("USD / EUR", currency)
 }
 
-function getTimeZoneOffsetMs(date: Date, timeZone: string) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(date)
-
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
-  const zonedAsUtc = Date.UTC(
-    Number(values.year),
-    Number(values.month) - 1,
-    Number(values.day),
-    Number(values.hour),
-    Number(values.minute),
-    Number(values.second),
-  )
-
-  return zonedAsUtc - date.getTime()
-}
-
-function zonedTimeToUtc(year: number, month: number, day: number, time: string, timeZone: string) {
-  const { hours, minutes } = parseTime(time)
-  const utcGuess = Date.UTC(year, month - 1, day, hours, minutes, 0)
-  const firstOffset = getTimeZoneOffsetMs(new Date(utcGuess), timeZone)
-  const firstUtc = new Date(utcGuess - firstOffset)
-  const secondOffset = getTimeZoneOffsetMs(firstUtc, timeZone)
-
-  return new Date(utcGuess - secondOffset)
-}
-
-function getZonedCalendarParts(date: Date, timeZone: string) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    weekday: "short",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date)
-
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
-  const weekdayMap: Record<string, number> = {
-    Sun: 0,
-    Mon: 1,
-    Tue: 2,
-    Wed: 3,
-    Thu: 4,
-    Fri: 5,
-    Sat: 6,
-  }
-
-  return {
-    year: Number(values.year),
-    month: Number(values.month),
-    day: Number(values.day),
-    weekdayIndex: weekdayMap[values.weekday] ?? 0,
-  }
-}
-
-function addDaysToCalendarDate(year: number, month: number, day: number, daysToAdd: number) {
-  const date = new Date(Date.UTC(year, month - 1, day + daysToAdd))
-
-  return {
-    year: date.getUTCFullYear(),
-    month: date.getUTCMonth() + 1,
-    day: date.getUTCDate(),
-  }
-}
-
-function formatDateTimeInTimeZone(date: Date, timeZone: string, language: "en" | "es") {
-  const locale = language === "es" ? "es-AR" : "en-US"
-  const parts = new Intl.DateTimeFormat(locale, {
-    timeZone,
-    weekday: "long",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(date)
-
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
-
-  return {
-    weekday: values.weekday,
-    time: `${values.hour}:${values.minute}`,
-  }
-}
-
-function formatArgentinaRangeFromStudentLocalTime({
-  dayIndex,
-  startTime,
-  endTime,
-  studentTimeZone,
+function BinanceUsdtPaymentBlock({
+  qrSrc,
+  paymentUrl,
   language,
+  confirmed,
+  onConfirm,
 }: {
-  dayIndex: number
-  startTime: string
-  endTime: string
-  studentTimeZone: string
+  qrSrc: string
+  paymentUrl: string
   language: "en" | "es"
+  confirmed: boolean
+  onConfirm: () => void
 }) {
-  const todayInStudentZone = getZonedCalendarParts(new Date(), studentTimeZone)
-  const daysUntilTarget = (dayIndex - todayInStudentZone.weekdayIndex + 7) % 7
-  const targetDate = addDaysToCalendarDate(
-    todayInStudentZone.year,
-    todayInStudentZone.month,
-    todayInStudentZone.day,
-    daysUntilTarget,
+  return (
+    <div className="mt-4 grid min-w-0 gap-4 rounded-[0.85rem] bg-[var(--surface-soft)] p-4 ring-1 ring-border/70 sm:grid-cols-[auto_minmax(0,1fr)]">
+      <div className="mx-auto w-full max-w-[132px] rounded-[0.8rem] bg-white p-2 ring-1 ring-border/70 sm:mx-0">
+        <Image
+          src={qrSrc}
+          alt="Binance USDT payment QR"
+          width={132}
+          height={132}
+          className="h-auto w-full rounded-[0.55rem]"
+        />
+      </div>
+
+      <div className="grid min-w-0 content-center gap-2 text-primary">
+        <p className="text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-accent">Binance (USDT)</p>
+
+        <p className="text-[0.76rem] leading-[1.55] text-muted-foreground">
+          {language === "es"
+            ? "Escaneá el QR correspondiente a este servicio o abrí el link de Binance. Luego marcá la confirmación de pago."
+            : "Scan the QR code for this service or open the Binance link. Then check the payment confirmation box."}
+        </p>
+
+        <Button
+          asChild
+          className="mt-1 h-10 w-full rounded-full bg-primary px-5 text-[0.76rem] font-semibold text-white hover:bg-primary/92 sm:w-fit"
+        >
+          <a href={paymentUrl} target="_blank" rel="noopener noreferrer" onClick={onConfirm}>
+            {confirmed
+              ? language === "es"
+                ? "Binance (USDT) seleccionado"
+                : "Binance (USDT) selected"
+              : language === "es"
+                ? "Seleccionar y pagar"
+                : "Select & pay"}
+          </a>
+        </Button>
+      </div>
+    </div>
   )
-
-  const startUtc = zonedTimeToUtc(targetDate.year, targetDate.month, targetDate.day, startTime, studentTimeZone)
-  const endUtc = zonedTimeToUtc(targetDate.year, targetDate.month, targetDate.day, endTime, studentTimeZone)
-
-  const startArgentina = formatDateTimeInTimeZone(startUtc, argentinaTimeZone, language)
-  const endArgentina = formatDateTimeInTimeZone(endUtc, argentinaTimeZone, language)
-
-  if (startArgentina.weekday === endArgentina.weekday) {
-    return `${startArgentina.weekday} ${startArgentina.time}–${endArgentina.time}`
-  }
-
-  return `${startArgentina.weekday} ${startArgentina.time}–${endArgentina.weekday} ${endArgentina.time}`
 }
 
 export function ContactForm() {
@@ -397,6 +360,7 @@ export function ContactForm() {
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false)
   const [paymentConfirmed, setPaymentConfirmed] = useState(false)
   const [paymentLinkOpened, setPaymentLinkOpened] = useState(false)
+  const [binancePaymentSelected, setBinancePaymentSelected] = useState(false)
 
   const paymentCopy = {
     packageTitle: language === "es" ? "Elegí un paquete y pago" : "Choose a package & payment",
@@ -413,20 +377,20 @@ export function ContactForm() {
     securePayment: language === "es" ? "Pago seguro" : "Secure payment",
     paymentButton:
       language === "es"
-        ? "Pagar con PayPal / Apple Pay / tarjeta de crédito/débito"
-        : "Pay with PayPal / Apple Pay / credit/debit card",
+        ? "Pagar con PayPal / tarjeta de crédito/débito"
+        : "Pay with PayPal / credit/debit card",
     paymentNote:
       language === "es"
-        ? "Podés pagar con PayPal, Apple Pay o tarjeta de crédito/débito, según la disponibilidad de PayPal en tu país."
-        : "You can pay with PayPal, Apple Pay, or a credit/debit card, depending on PayPal availability in your country.",
+        ? "Podés pagar con PayPal, Apple Pay o tarjeta de crédito/débito, según la disponibilidad de PayPal en tu país. También podés abonar con Binance (USDT) escaneando el QR correspondiente."
+        : "You can pay with PayPal, Apple Pay, or a credit/debit card, depending on PayPal availability in your country. You can also pay with Binance (USDT) by scanning the corresponding QR code.",
     paymentConfirmation:
       language === "es"
         ? "Confirmo que ya completé el pago y quiero enviar mis datos a Spanish Academy."
         : "I have completed the payment and want to send my request details to Spanish Academy.",
     paymentLinkFirst:
       language === "es"
-        ? "Primero abrí el link de pago. Después vas a poder confirmar el pago y enviar el formulario."
-        : "Open the payment link first. Then you’ll be able to confirm payment and send the form.",
+        ? "Primero abrí el link de PayPal checkout o seleccioná Binance (USDT). Después vas a poder confirmar el pago y enviar el formulario."
+        : "Open the PayPal checkout link or select Binance (USDT) first. Then you’ll be able to confirm payment and send the form.",
     selectPackage:
       language === "es"
         ? "Seleccioná un paquete de clases para mostrar la opción de pago."
@@ -584,6 +548,7 @@ export function ContactForm() {
   const resetPaymentConfirmation = () => {
     setPaymentConfirmed(false)
     setPaymentLinkOpened(false)
+    setBinancePaymentSelected(false)
   }
 
   const updateCountry = (countryName: string) => {
@@ -682,6 +647,7 @@ export function ContactForm() {
   const isEnglishLesson = form.service === t("form.service.english") || form.service === "English lessons"
 
   const paymentCurrency: Currency = form.paymentCurrency
+  const paypalCurrency: PaypalCurrency | null = paymentCurrency === "USDT" ? null : paymentCurrency
 
   const serviceLanguage: ServiceLanguage = isLive
     ? form.liveLanguage === t("form.liveLanguage.english") || form.liveLanguage === "English"
@@ -698,9 +664,14 @@ export function ContactForm() {
       : null
 
   const paypalHostedButtonId =
-    paypalPlanKey && paypalButtons[paypalPlanKey]?.[serviceLanguage]?.[paymentCurrency]
-      ? paypalButtons[paypalPlanKey][serviceLanguage][paymentCurrency]
+    paypalPlanKey && paypalCurrency && paypalButtons[paypalPlanKey]?.[serviceLanguage]?.[paypalCurrency]
+      ? paypalButtons[paypalPlanKey][serviceLanguage][paypalCurrency]
       : null
+
+  const binanceQrSrc = paypalPlanKey ? binanceQrImages[paypalPlanKey]?.[serviceLanguage] : null
+  const binancePaymentUrl = paypalPlanKey ? binancePaymentLinks[paypalPlanKey]?.[serviceLanguage] : null
+  const selectedPaymentMethod = binancePaymentSelected ? "Binance (USDT)" : "PayPal checkout"
+  const selectedPaymentCurrency = binancePaymentSelected ? "USDT" : form.paymentCurrency
 
   const paymentSummary = isLive
     ? {
@@ -746,52 +717,12 @@ export function ContactForm() {
           .join("; ")
       : "Not provided"
 
-  const liveServiceTimeZone = isLive
-    ? getPrimaryTimeZoneForCountry(form.liveServiceCountry) || form.timeZone
-    : form.timeZone
-
-  const argentinaTimeText = (() => {
-    if (isLive) {
-      if (!form.liveDate || !form.liveTime || !liveServiceTimeZone) return "Not provided"
-
-      const [year, month, day] = form.liveDate.split("-").map(Number)
-      const liveUtc = zonedTimeToUtc(year, month, day, form.liveTime, liveServiceTimeZone)
-      const argentinaTime = formatDateTimeInTimeZone(liveUtc, argentinaTimeZone, language)
-
-      return `${argentinaTime.weekday} ${argentinaTime.time}`
-    }
-
-    if (!selectedAvailabilityRows.length || !form.timeZone) return "Not provided"
-
-    return selectedAvailabilityRows
-      .map(({ day, block }) => {
-        if (!block) return `${day.label} — Time not selected`
-
-        const blockLabel = getCleanTimeBlockLabel(block.label)
-
-        if (block.startTime && block.endTime) {
-          const argentinaRange = formatArgentinaRangeFromStudentLocalTime({
-            dayIndex: day.dayIndex,
-            startTime: block.startTime,
-            endTime: block.endTime,
-            studentTimeZone: form.timeZone,
-            language,
-          })
-
-          return `${day.label} — ${blockLabel}: ${argentinaRange}`
-        }
-
-        return `${day.label} — ${blockLabel}`
-      })
-      .join("; ")
-  })()
-
   const mailBody = [
     `Service: ${form.service}`,
     paymentSummary ? `Selected product: ${paymentSummary.name}` : null,
     paymentSummary ? `Price: ${formatPrice(paymentSummary.price, form.paymentCurrency)}` : null,
-    `Currency: ${form.paymentCurrency}`,
-    `Payment method: ${form.paymentMethod}`,
+    `Currency: ${selectedPaymentCurrency}`,
+    `Payment method: ${selectedPaymentMethod}`,
     `Full name: ${form.fullName}`,
     `Email: ${form.email}`,
     `Country of residence: ${form.country || "Not provided"}`,
@@ -799,16 +730,17 @@ export function ContactForm() {
       ? `Country where the interpretation service will be delivered: ${form.liveServiceCountry || "Not provided"}`
       : null,
     `Phone number: ${form.phone || "Not provided"}`,
-    `Level: ${isLive ? "Not applicable" : form.level}`,
-    `Learning goal: ${isLive ? form.liveContext : form.goal}`,
-    `Specific goal: ${isLive ? form.liveDetails || "Not provided" : form.specificGoal || "Not provided"}`,
+    isLive ? null : `Level: ${form.level}`,
+    isLive ? `Type of situation: ${form.liveContext}` : `Learning goal: ${form.goal}`,
+    isLive
+      ? `Situation details: ${form.liveDetails || "Not provided"}`
+      : `Specific goal: ${form.specificGoal || "Not provided"}`,
     `Available days: ${availableDaysText}`,
     `Available time: ${availableTimeText}`,
     isLive
       ? `${language === "es" ? "Formato preferido" : "Preferred format"}: ${form.liveFormat || "Not provided"}`
       : `Exact times: ${form.exactTime || "Not provided"}`,
     `Optional message: ${form.message || "Not provided"}`,
-    `ARG: ${argentinaTimeText}`,
   ]
     .filter((item): item is string => item !== null)
     .join("\n")
@@ -1082,8 +1014,8 @@ export function ContactForm() {
 
                 <p className="min-w-0 rounded-[0.85rem] bg-[var(--surface-soft)] p-3 text-[0.72rem] leading-[1.55] text-muted-foreground ring-1 ring-border/70 md:col-span-2">
                   {language === "es"
-                    ? "Los días y horarios seleccionados se interpretan según la zona horaria del alumno y se enviarán también convertidos a la hora de Argentina."
-                    : "Selected days and times are interpreted in the student's selected time zone and will also be sent converted to Argentina time."}
+                    ? "Los días y horarios seleccionados se interpretan según la zona horaria seleccionada."
+                    : "Selected days and times are interpreted in the selected time zone."}
                 </p>
 
                 <p className="min-w-0 rounded-[0.85rem] bg-[var(--surface-soft)] p-3 text-[0.72rem] leading-[1.55] text-muted-foreground ring-1 ring-border/70 md:col-span-2">
@@ -1140,98 +1072,100 @@ export function ContactForm() {
                     </label>
                   </section>
 
-                  <section className="grid min-w-0 gap-4 md:grid-cols-2">
-                    <div className="min-w-0">
-                      <p className="fine-label">04</p>
-                      <h3 className="mt-1 break-words font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary sm:text-[1.35rem]">
-                        {t("form.days.title")}
-                      </h3>
-                      <p className="mt-2 text-[0.78rem] text-muted-foreground">
-                        {t("form.days.subtitle")}
-                      </p>
+                  <section className="grid min-w-0 gap-4">
+                    <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+                      <div className="grid min-w-0 content-start rounded-[0.95rem] border border-border/70 bg-white p-4 sm:p-5">
+                        <div className="min-w-0">
+                          <p className="fine-label">04</p>
+                          <h3 className="mt-1 break-words font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary sm:text-[1.35rem]">
+                            {t("form.days.title")}
+                          </h3>
+                          <p className="mt-2 min-h-[1.25rem] text-[0.78rem] leading-[1.45] text-muted-foreground">
+                            {t("form.days.subtitle")}
+                          </p>
 
-                      {selectedPlanData ? (
-                        <p className="mt-2 text-[0.72rem] leading-[1.45] text-muted-foreground">
-                          {language === "es"
-                            ? `Podés seleccionar hasta ${selectedDayLimit} día${selectedDayLimit === 1 ? "" : "s"} para este paquete.`
-                            : `You can select up to ${selectedDayLimit} day${selectedDayLimit === 1 ? "" : "s"} for this package.`}
-                        </p>
-                      ) : null}
-
-                      <div className="mt-4 grid min-w-0 grid-cols-2 gap-2">
-                        {days.map((day) => {
-                          const isSelected = Object.prototype.hasOwnProperty.call(form.availabilityByDay, day.key)
-                          const isDisabled = !isSelected && selectedDayCount >= selectedDayLimit
-
-                          return (
-                            <button
-                              key={day.key}
-                              type="button"
-                              disabled={isDisabled}
-                              onClick={() => toggleAvailabilityDay(day.key)}
-                              className={`min-w-0 rounded-full border px-3 py-2 text-[0.74rem] font-semibold ${
-                                isSelected
-                                  ? "border-primary bg-primary text-white"
-                                  : "border-border bg-white text-muted-foreground hover:text-primary"
-                              } ${isDisabled ? "cursor-not-allowed opacity-45 hover:text-muted-foreground" : ""}`}
-                            >
-                              <span className="block truncate">{day.label}</span>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="fine-label">05</p>
-                      <h3 className="mt-1 break-words font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary sm:text-[1.35rem]">
-                        {t("form.time.title")}
-                      </h3>
-                      <p className="mt-2 text-[0.78rem] text-muted-foreground">
-                        {t("form.time.subtitle")}
-                      </p>
-
-                      <div className="mt-4 grid min-w-0 gap-2">
-                        {selectedDayRows.length > 0 ? (
-                          selectedDayRows.map((day) => (
-                            <label
-                              key={day.key}
-                              className="grid min-w-0 gap-1.5 text-[0.72rem] font-semibold text-primary"
-                            >
-                              {day.label}
-                              <select
-                                value={form.availabilityByDay[day.key] || ""}
-                                onChange={(event) => updateAvailabilityBlock(day.key, event.target.value)}
-                                className="h-10 min-w-0 rounded-md border border-border bg-white px-3 text-[0.82rem] text-primary outline-none"
-                              >
-                                <option value="">
-                                  {language === "es" ? "Seleccionar horario" : "Select time"}
-                                </option>
-                                {timeBlocks.map((block) => (
-                                  <option key={`${day.key}-${block.key}`} value={block.key}>
-                                    {block.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                          ))
-                        ) : (
-                          <div className="grid min-w-0 gap-1.5">
-                            <span className="select-none text-[0.72rem] font-semibold text-primary opacity-0">
-                              {language === "es" ? "Día" : "Day"}
-                            </span>
-
-                            <p className="rounded-[0.85rem] bg-white p-3 text-[0.74rem] leading-[1.55] text-muted-foreground ring-1 ring-border/70">
+                          {selectedPlanData ? (
+                            <p className="mt-2 min-h-[1.05rem] text-[0.72rem] leading-[1.45] text-muted-foreground">
                               {language === "es"
-                                ? "Primero seleccioná uno o más días."
-                                : "Select one or more days first."}
+                                ? `Podés seleccionar hasta ${selectedDayLimit} día${selectedDayLimit === 1 ? "" : "s"} para este paquete.`
+                                : `You can select up to ${selectedDayLimit} day${selectedDayLimit === 1 ? "" : "s"} for this package.`}
                             </p>
-                          </div>
-                        )}
+                          ) : (
+                            <p className="mt-2 min-h-[1.05rem] text-[0.72rem] leading-[1.45] text-transparent">—</p>
+                          )}
+                        </div>
+
+                        <div className="mt-4 grid min-w-0 grid-cols-2 gap-2">
+                          {days.map((day) => {
+                            const isSelected = Object.prototype.hasOwnProperty.call(form.availabilityByDay, day.key)
+                            const isDisabled = !isSelected && selectedDayCount >= selectedDayLimit
+
+                            return (
+                              <button
+                                key={day.key}
+                                type="button"
+                                disabled={isDisabled}
+                                onClick={() => toggleAvailabilityDay(day.key)}
+                                className={`min-w-0 rounded-full border px-3 py-2 text-[0.74rem] font-semibold ${
+                                  isSelected
+                                    ? "border-primary bg-primary text-white"
+                                    : "border-border bg-white text-muted-foreground hover:text-primary"
+                                } ${isDisabled ? "cursor-not-allowed opacity-45 hover:text-muted-foreground" : ""}`}
+                              >
+                                <span className="block truncate">{day.label}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="grid min-w-0 content-start rounded-[0.95rem] border border-border/70 bg-white p-4 sm:p-5">
+                        <div className="min-w-0">
+                          <p className="fine-label">05</p>
+                          <h3 className="mt-1 break-words font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary sm:text-[1.35rem]">
+                            {t("form.time.title")}
+                          </h3>
+                          <p className="mt-2 min-h-[1.25rem] text-[0.78rem] leading-[1.45] text-muted-foreground">
+                            {t("form.time.subtitle")}
+                          </p>
+
+                          <p className="mt-2 min-h-[1.05rem] text-[0.72rem] leading-[1.45] text-transparent">—</p>
+                        </div>
+
+                        <div className="mt-4 grid min-w-0 gap-2">
+                          {selectedDayRows.length > 0 ? (
+                            selectedDayRows.map((day) => (
+                              <label
+                                key={day.key}
+                                className="grid min-w-0 gap-1.5 text-[0.72rem] font-semibold text-primary"
+                              >
+                                {day.label}
+                                <select
+                                  value={form.availabilityByDay[day.key] || ""}
+                                  onChange={(event) => updateAvailabilityBlock(day.key, event.target.value)}
+                                  className="h-10 min-w-0 rounded-md border border-border bg-white px-3 text-[0.82rem] text-primary outline-none"
+                                >
+                                  <option value="">
+                                    {language === "es" ? "Seleccionar horario" : "Select time"}
+                                  </option>
+                                  {timeBlocks.map((block) => (
+                                    <option key={`${day.key}-${block.key}`} value={block.key}>
+                                      {block.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                            ))
+                          ) : (
+                            <p className="flex min-h-10 items-center rounded-[0.85rem] border border-border bg-white px-3 text-[0.74rem] leading-[1.55] text-muted-foreground">
+                              {language === "es" ? "Primero seleccioná uno o más días." : "Select one or more days first."}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
 
-                    <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary md:col-span-2">
+                    <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary">
                       {t("form.time.exact")}
                       <Input
                         value={form.exactTime}
@@ -1244,7 +1178,7 @@ export function ContactForm() {
                       </span>
                     </label>
 
-                    <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary md:col-span-2">
+                    <label className="grid min-w-0 gap-2 text-[0.72rem] font-semibold text-primary">
                       {language === "es" ? "Plataforma preferida" : "Preferred platform"}
                       <select
                         value={form.lessonPlatform}
@@ -1487,30 +1421,50 @@ export function ContactForm() {
                         </div>
                       </div>
 
-                      {paypalHostedButtonId && (
+                      {(paypalHostedButtonId || (binanceQrSrc && binancePaymentUrl)) && (
                         <div className="mt-5 min-w-0 rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
                           <p className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-accent">
                             {paymentCopy.securePayment}
                           </p>
 
-                          <PayPalPaymentButton
-                            hostedButtonId={paypalHostedButtonId}
-                            label={paymentCopy.paymentButton}
-                            onPaymentLinkOpen={() => setPaymentLinkOpened(true)}
-                          />
+                          {paypalHostedButtonId ? (
+                            <PayPalPaymentButton
+                              hostedButtonId={paypalHostedButtonId}
+                              label={paymentCopy.paymentButton}
+                              onPaymentLinkOpen={() => {
+                                setPaymentLinkOpened(true)
+                                setBinancePaymentSelected(false)
+                                setPaymentConfirmed(false)
+                              }}
+                            />
+                          ) : null}
 
                           <p className="mt-3 text-[0.72rem] leading-[1.55] text-muted-foreground">
                             {paymentCopy.paymentNote}
                           </p>
 
+                          {binanceQrSrc && binancePaymentUrl ? (
+                            <BinanceUsdtPaymentBlock
+                              qrSrc={binanceQrSrc}
+                              paymentUrl={binancePaymentUrl || "#"}
+                              language={language}
+                              confirmed={binancePaymentSelected}
+                              onConfirm={() => {
+                                setBinancePaymentSelected(true)
+                                setPaymentLinkOpened(false)
+                                setPaymentConfirmed(false)
+                              }}
+                            />
+                          ) : null}
+
                           <label
                             className={`mt-4 flex min-w-0 gap-3 rounded-[0.85rem] bg-[var(--surface-soft)] p-4 text-[0.78rem] font-semibold leading-[1.5] text-primary ring-1 ring-border/70 ${
-                              !paymentLinkOpened ? "opacity-55" : ""
+                              !paymentLinkOpened && !binancePaymentSelected ? "opacity-55" : ""
                             }`}
                           >
                             <input
                               type="checkbox"
-                              disabled={!paymentLinkOpened}
+                              disabled={!paymentLinkOpened && !binancePaymentSelected}
                               checked={paymentConfirmed}
                               onChange={(event) => setPaymentConfirmed(event.target.checked)}
                               className="mt-1 h-4 w-4 shrink-0 accent-primary disabled:cursor-not-allowed disabled:opacity-45"
@@ -1518,7 +1472,7 @@ export function ContactForm() {
                             <span className="min-w-0 break-words">{paymentCopy.paymentConfirmation}</span>
                           </label>
 
-                          {!paymentLinkOpened ? (
+                          {!paymentLinkOpened && !binancePaymentSelected ? (
                             <p className="mt-2 text-[0.7rem] leading-[1.45] text-muted-foreground">
                               {paymentCopy.paymentLinkFirst}
                             </p>
@@ -1585,30 +1539,50 @@ export function ContactForm() {
                       </div>
                     </div>
 
-                    {paypalHostedButtonId && (
+                    {(paypalHostedButtonId || (binanceQrSrc && binancePaymentUrl)) && (
                       <div className="mt-5 min-w-0 rounded-[0.85rem] bg-white p-4 ring-1 ring-border/70">
                         <p className="mb-3 text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-accent">
                           {paymentCopy.securePayment}
                         </p>
 
-                        <PayPalPaymentButton
-                          hostedButtonId={paypalHostedButtonId}
-                          label={paymentCopy.paymentButton}
-                          onPaymentLinkOpen={() => setPaymentLinkOpened(true)}
-                        />
+                        {paypalHostedButtonId ? (
+                          <PayPalPaymentButton
+                            hostedButtonId={paypalHostedButtonId}
+                            label={paymentCopy.paymentButton}
+                            onPaymentLinkOpen={() => {
+                              setPaymentLinkOpened(true)
+                              setBinancePaymentSelected(false)
+                              setPaymentConfirmed(false)
+                            }}
+                          />
+                        ) : null}
 
                         <p className="mt-3 text-[0.72rem] leading-[1.55] text-muted-foreground">
                           {paymentCopy.paymentNote}
                         </p>
 
+                        {binanceQrSrc && binancePaymentUrl ? (
+                          <BinanceUsdtPaymentBlock
+                            qrSrc={binanceQrSrc}
+                            paymentUrl={binancePaymentUrl || "#"}
+                            language={language}
+                            confirmed={binancePaymentSelected}
+                            onConfirm={() => {
+                              setBinancePaymentSelected(true)
+                              setPaymentLinkOpened(false)
+                              setPaymentConfirmed(false)
+                            }}
+                          />
+                        ) : null}
+
                         <label
                           className={`mt-4 flex min-w-0 gap-3 rounded-[0.85rem] bg-[var(--surface-soft)] p-4 text-[0.78rem] font-semibold leading-[1.5] text-primary ring-1 ring-border/70 ${
-                            !paymentLinkOpened ? "opacity-55" : ""
+                            !paymentLinkOpened && !binancePaymentSelected ? "opacity-55" : ""
                           }`}
                         >
                           <input
                             type="checkbox"
-                            disabled={!paymentLinkOpened}
+                            disabled={!paymentLinkOpened && !binancePaymentSelected}
                             checked={paymentConfirmed}
                             onChange={(event) => setPaymentConfirmed(event.target.checked)}
                             className="mt-1 h-4 w-4 shrink-0 accent-primary disabled:cursor-not-allowed disabled:opacity-45"
@@ -1616,7 +1590,7 @@ export function ContactForm() {
                           <span className="min-w-0 break-words">{paymentCopy.paymentConfirmation}</span>
                         </label>
 
-                        {!paymentLinkOpened ? (
+                        {!paymentLinkOpened && !binancePaymentSelected ? (
                           <p className="mt-2 text-[0.7rem] leading-[1.45] text-muted-foreground">
                             {paymentCopy.paymentLinkFirst}
                           </p>

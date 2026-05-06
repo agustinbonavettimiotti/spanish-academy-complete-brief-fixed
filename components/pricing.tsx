@@ -22,8 +22,19 @@ export function Pricing() {
       ? "Planes flexibles adaptados a tus objetivos y disponibilidad. Todo lo que necesitás para empezar son 2 clases con un profesor nativo certificado."
       : "Flexible plans tailored to your goals and schedule. All you need to get started is 2 lessons with a certified native-speaking teacher."
 
-  const lessonSubtitle = (count: number) =>
-    language === "es" ? `(${count} clases)` : `(${count} Lessons)`
+  const paymentMethodsTitle = language === "es" ? "Métodos de pago disponibles" : "Available payment methods"
+
+  const paymentMethods =
+    language === "es"
+      ? ["PayPal", "Tarjeta de crédito/débito", "Binance (USDT)"]
+      : ["PayPal", "Credit/debit card", "Binance (USDT)"]
+
+  const paymentCurrencyNote =
+    language === "es"
+      ? "Elegí un pack de clases o servicio para continuar al formulario de solicitud, donde podrás seleccionar tu método de pago preferido."
+      : "Select a lesson pack or service to continue to the request form, where you can choose your preferred payment method."
+
+  const lessonSubtitle = (count: number) => (language === "es" ? `(${count} clases)` : `(${count} Lessons)`)
 
   const cards: PriceCard[] = [
     {
@@ -118,6 +129,27 @@ export function Pricing() {
             <p className="mt-3 max-w-[72ch] text-[0.82rem] leading-[1.65] text-muted-foreground">
               {t("pricing.duration")}
             </p>
+
+            <div className="mt-5 rounded-[0.95rem] border border-border/80 bg-white p-4 shadow-[0_14px_44px_-38px_rgba(7,52,92,.18)]">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-accent">
+                {paymentMethodsTitle}
+              </p>
+
+              <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-3">
+                {paymentMethods.map((method) => (
+                  <div
+                    key={method}
+                    className="flex min-h-10 min-w-0 items-center rounded-full border border-border bg-[var(--surface-soft)] px-3 text-[0.76rem] font-semibold text-primary"
+                  >
+                    <span className="min-w-0 break-words">{method}</span>
+                  </div>
+                ))}
+              </div>
+
+              <p className="mt-3 max-w-[72ch] text-[0.74rem] leading-[1.55] text-muted-foreground">
+                {paymentCurrencyNote}
+              </p>
+            </div>
           </div>
 
           <div className="grid w-full min-w-0 gap-4 overflow-visible pt-4 md:grid-cols-2 md:gap-5 md:pt-8 xl:grid-cols-4">
