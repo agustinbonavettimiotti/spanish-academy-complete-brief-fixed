@@ -64,11 +64,11 @@ export function Hero() {
 
                   {language === "es" ? (
                     <p className="text-[0.82rem] font-semibold leading-snug">
-                      Todos nuestros servicios se pueden abonar con PayPal Apple Pay tarjeta de débito/crédito y Binance (USDT)
+                      Todos nuestros servicios se pueden abonar con PayPal, Apple Pay, tarjeta de débito/crédito y Binance (USDT)
                     </p>
                   ) : (
                     <p className="text-[0.82rem] font-semibold leading-snug">
-                      All our services are payable via PayPal Apple Pay debit/credit card and Binance (USDT)
+                      All our services can be paid with PayPal, Apple Pay, debit/credit card, and Binance (USDT)
                     </p>
                   )}
                 </div>

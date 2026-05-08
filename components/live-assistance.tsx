@@ -62,35 +62,41 @@ export function LiveAssistance() {
           </div>
 
           <div className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid items-stretch gap-4 md:grid-cols-2">
               {services.map(({ title, body, note, icon: Icon, href, cta }) => (
                 <article
                   key={title}
-                  className="flex min-w-0 flex-col rounded-[1rem] border border-border/85 bg-white p-6 shadow-[0_18px_56px_-48px_rgba(7,52,92,.16)]"
+                  className="flex h-full min-w-0 flex-col rounded-[1rem] border border-border/85 bg-white p-6 shadow-[0_18px_56px_-48px_rgba(7,52,92,.16)]"
                 >
                   <span className="grid size-12 place-items-center rounded-full bg-[var(--icon-surface)] text-primary">
                     <Icon className="h-5 w-5" />
                   </span>
 
-                  <h3 className="mt-6 font-serif text-[1.45rem] font-normal leading-[1.04] tracking-[-0.05em] text-primary">
+                  <h3 className="mt-6 min-h-[3.05rem] font-serif text-[1.45rem] font-normal leading-[1.04] tracking-[-0.05em] text-primary">
                     {title}
                   </h3>
 
-                  <p className="mt-4 text-[0.82rem] leading-[1.7] text-muted-foreground">{body}</p>
+                  <p className="mt-4 min-h-[12.2rem] text-[0.82rem] leading-[1.7] text-muted-foreground">
+                    {body}
+                  </p>
 
                   <div className="mt-5 h-px w-10 bg-accent" />
 
-                  <p className="mt-4 text-[0.78rem] leading-[1.6] text-[var(--ink-soft)]">{note}</p>
+                  <p className="mt-4 min-h-[3.8rem] text-[0.78rem] leading-[1.6] text-[var(--ink-soft)]">
+                    {note}
+                  </p>
 
-                  <Button
-                    asChild
-                    className="interactive-button mt-6 h-auto min-h-11 w-full whitespace-normal rounded-full bg-primary px-4 py-3 text-center text-[0.72rem] font-semibold leading-[1.2] text-white hover:bg-primary/92"
-                  >
-                    <a href={href} className="flex w-full min-w-0 items-center justify-center gap-2 text-center">
-                      <span className="min-w-0 whitespace-normal break-words">{cta}</span>
-                      <ArrowRight className="h-4 w-4 shrink-0" />
-                    </a>
-                  </Button>
+                  <div className="mt-auto pt-7">
+                    <Button
+                      asChild
+                      className="interactive-button h-auto min-h-11 w-full whitespace-normal rounded-full bg-primary px-4 py-3 text-center text-[0.72rem] font-semibold leading-[1.2] text-white hover:bg-primary/92"
+                    >
+                      <a href={href} className="flex w-full min-w-0 items-center justify-center gap-2 text-center">
+                        <span className="min-w-0 whitespace-normal break-words">{cta}</span>
+                        <ArrowRight className="h-4 w-4 shrink-0" />
+                      </a>
+                    </Button>
+                  </div>
                 </article>
               ))}
             </div>

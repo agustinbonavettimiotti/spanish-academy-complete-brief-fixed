@@ -22,17 +22,17 @@ export function Pricing() {
       ? "Planes flexibles adaptados a tus objetivos y disponibilidad. Todo lo que necesitás para empezar son 2 clases con un profesor nativo certificado."
       : "Flexible plans tailored to your goals and schedule. All you need to get started is 2 lessons with a certified native-speaking teacher."
 
-  const paymentMethodsTitle = language === "es" ? "Métodos de pago disponibles" : "Available payment methods"
+  const paymentMethodsTitle = language === "es" ? "Pagos" : "Payments"
 
   const paymentMethods =
     language === "es"
-      ? ["PayPal", "Tarjeta de crédito/débito", "Binance (USDT)"]
-      : ["PayPal", "Credit/debit card", "Binance (USDT)"]
+      ? ["PayPal", "Apple Pay", "Tarjeta de débito/crédito", "Binance (USDT)"]
+      : ["PayPal", "Apple Pay", "Debit/credit card", "Binance (USDT)"]
 
   const paymentCurrencyNote =
     language === "es"
-      ? "Elegí un pack de clases o servicio para continuar al formulario de solicitud, donde podrás seleccionar tu método de pago preferido."
-      : "Select a lesson pack or service to continue to the request form, where you can choose your preferred payment method."
+      ? "Pagos: Todos nuestros servicios se pueden abonar con PayPal, Apple Pay, tarjeta de débito/crédito y Binance (USDT)."
+      : "Payments: All our services can be paid with PayPal, Apple Pay, debit/credit card, and Binance (USDT)."
 
   const lessonSubtitle = (count: number) => (language === "es" ? `(${count} clases)` : `(${count} Lessons)`)
 
@@ -50,7 +50,7 @@ export function Pricing() {
         </>
       ),
       price: "65",
-      cadence: "EUR",
+      cadence: "USD",
       items: ["2 " + t("pricing.lessons"), t("pricing.duration")],
       popular: false,
     },
@@ -67,7 +67,7 @@ export function Pricing() {
         </>
       ),
       price: "125",
-      cadence: "EUR",
+      cadence: "USD",
       items: ["4 " + t("pricing.lessons"), t("pricing.duration")],
       popular: false,
     },
@@ -84,7 +84,7 @@ export function Pricing() {
         </>
       ),
       price: "235",
-      cadence: "EUR",
+      cadence: "USD",
       items: ["8 " + t("pricing.lessons"), t("pricing.duration")],
       popular: false,
     },
@@ -101,7 +101,7 @@ export function Pricing() {
         </>
       ),
       price: "280",
-      cadence: "EUR",
+      cadence: "USD",
       items: ["10 " + t("pricing.lessons"), t("pricing.duration")],
       popular: true,
     },
@@ -135,7 +135,7 @@ export function Pricing() {
                 {paymentMethodsTitle}
               </p>
 
-              <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-3">
+              <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2 lg:grid-cols-4">
                 {paymentMethods.map((method) => (
                   <div
                     key={method}
@@ -176,7 +176,8 @@ export function Pricing() {
 
                       <div className="mt-5 flex min-h-0 items-start gap-1 md:min-h-[4.05rem]">
                         <span className="font-sans tabular-nums text-[2.6rem] font-semibold leading-none tracking-[-0.05em] text-primary sm:text-[2.95rem]">
-                          €{card.price}
+                          {"$"}
+                          {card.price}
                         </span>
 
                         <span className="pt-[1.7rem] text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:pt-[1.95rem] sm:text-[0.7rem]">

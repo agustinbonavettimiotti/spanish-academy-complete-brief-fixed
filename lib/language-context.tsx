@@ -92,7 +92,7 @@ const translations: Record<Language, Record<string, string>> = {
       "Wherever you are, whenever you need it. Communicate in English with complete confidence — whether you're managing appointments, handling paperwork, or engaging with others in your daily life. Our professional interpreters provide seamless, accurate support so nothing gets lost in translation.",
     "live.englishNote":
       "Fully bilingual and experienced across a wide range of everyday and professional situations.",
-    "live.price": "25 USD / EUR per hour",
+    "live.price": "25 USD per hour",
     "live.minimum": "Minimum booking: 1 hour (60 minutes, not divided)",
     "live.advance":
       "Please indicate the day, approximate time range, and a brief description of the situation that requires interpretation.",
@@ -128,9 +128,9 @@ const translations: Record<Language, Record<string, string>> = {
     "pricing.monthlyNote": "8 lessons total",
     "pricing.best": "Best rate",
     "pricing.perLesson": "per lesson",
-    "pricing.liveTitle": "Real-Time Spanish Interpretation / Real-Time English Interpretation",
+    "pricing.liveTitle": "Real-Time Spanish Interpretation | Real-Time English Interpretation",
     "pricing.liveNote1": "Minimum booking: 1 hour (60 minutes, not divided)",
-    "pricing.liveNote2": "25 USD / EUR per hour",
+    "pricing.liveNote2": "25 USD per hour",
     "pricing.liveNote3":
       "Please indicate the day, approximate time range, and the situation that requires interpretation",
 
@@ -375,7 +375,7 @@ const translations: Record<Language, Record<string, string>> = {
       "Donde estés, cuando lo necesites. Comunicate en inglés con total confianza, ya sea para gestionar turnos, resolver trámites o interactuar con otras personas en tu vida diaria. Nuestros intérpretes profesionales brindan apoyo claro y preciso para que nada se pierda en la traducción.",
     "live.englishNote":
       "Completamente bilingües y con experiencia en una amplia variedad de situaciones cotidianas y profesionales.",
-    "live.price": "25 USD / EUR la hora",
+    "live.price": "25 USD la hora",
     "live.minimum":
       "El mínimo para contratar el servicio es abonar por una hora (60 minutos, no se fracciona)",
     "live.advance":
@@ -413,7 +413,7 @@ const translations: Record<Language, Record<string, string>> = {
     "pricing.best": "Mejor tarifa",
     "pricing.perLesson": "por clase",
     "pricing.liveTitle": "Interpretación en español / interpretación en inglés",
-    "pricing.liveNote1": "Tiene un valor de 25 USD / EUR la hora",
+    "pricing.liveNote1": "Tiene un valor de 25 USD la hora",
     "pricing.liveNote2":
       "El mínimo para contratar el servicio es abonar por una hora (60 minutos, no se fracciona)",
     "pricing.liveNote3": "Indicar día, franja horaria aproximada y situación a interpretar",
