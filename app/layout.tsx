@@ -23,7 +23,19 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en" className="bg-background">
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased"> 
+        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18156371861"></script>
+
+  <script
+    dangerouslySetInnerHTML={{
+      __html: `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-18156371861');
+      `,
+    }}
+  />
         {children}
         {process.env.NODE_ENV === "production" && <Analytics />}
       </body>
