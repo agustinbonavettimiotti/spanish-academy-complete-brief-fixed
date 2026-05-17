@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, type FormEvent } from "react"
 import { useLanguage } from "@/lib/language-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -128,7 +128,7 @@ const paypalButtons: Record<PaypalPlanKey, Record<ServiceLanguage, Record<Paypal
   plus: {
     spanish: {
       USD: "JA9T9QBS5GBEY",
-      EUR: "MXUW3F869YNW4",
+      EUR: "K8DDWNCPX7X4J",
     },
     english: {
       USD: "7ZK6UNL5M2LV4",
@@ -361,6 +361,8 @@ export function ContactForm() {
   const [paymentConfirmed, setPaymentConfirmed] = useState(false)
   const [paymentLinkOpened, setPaymentLinkOpened] = useState(false)
   const [binancePaymentSelected, setBinancePaymentSelected] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState("")
 
   const paymentCopy = {
     packageTitle: language === "es" ? "Elegí un paquete y pago" : "Choose a package & payment",
@@ -751,11 +753,47 @@ export function ContactForm() {
       : "Real-Time Interpretation Services — Request Form"
     : "SPANISH ACADEMY – STUDENT INTAKE FORM"
 
-  const mailHref = `mailto:info@spanishglobalacademy.com?subject=${encodeURIComponent(
-    emailSubject,
-  )}&body=${encodeURIComponent(mailBody)}`
-
   const canSubmit = Boolean(paymentSummary) && paymentConfirmed
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!canSubmit || isSubmitting) {
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitError("")
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subject: emailSubject,
+          message: mailBody,
+          replyTo: form.email,
+          fullName: form.fullName,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Email delivery failed")
+      }
+
+      setSubmitted(true)
+    } catch (error) {
+      setSubmitError(
+        language === "es"
+          ? "No pudimos enviar la solicitud. Probá nuevamente o contactanos por email."
+          : "We couldn’t send your request. Please try again or contact us by email.",
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <section id="contact" className="section-pad bg-background">
@@ -824,28 +862,9 @@ export function ContactForm() {
                   {t("form.confirmation.note")}
                 </p>
               </div>
-
-              <Button
-                asChild
-                className="h-10 w-full rounded-full bg-primary px-6 text-[0.78rem] font-semibold text-white hover:bg-primary/92 sm:w-fit"
-              >
-                <a href={mailHref}>{t("form.confirmation.email")}</a>
-              </Button>
             </div>
           ) : (
-            <form
-              onSubmit={(event) => {
-                event.preventDefault()
-
-                if (!canSubmit) {
-                  return
-                }
-
-                setSubmitted(true)
-                window.location.href = mailHref
-              }}
-              className="min-w-0 space-y-6"
-            >
+            <form onSubmit={handleSubmit} className="min-w-0 space-y-6">
               <section className="min-w-0 rounded-[1rem] bg-[var(--surface-soft)] p-4 ring-1 ring-border/70 sm:p-5">
                 <div className="mb-4 min-w-0">
                   <p className="fine-label">01</p>
@@ -1624,15 +1643,21 @@ export function ContactForm() {
 
               <Button
                 type="submit"
-                disabled={!canSubmit}
+                disabled={!canSubmit || isSubmitting}
                 className={`interactive-button h-11 w-full rounded-full bg-primary px-6 text-[0.84rem] font-semibold text-white hover:bg-primary/92 sm:w-fit sm:px-7 ${
-                  !canSubmit ? "cursor-not-allowed opacity-45 hover:bg-primary" : ""
+                  !canSubmit || isSubmitting ? "cursor-not-allowed opacity-45 hover:bg-primary" : ""
                 }`}
               >
                 <Mail className="mr-2 h-4 w-4" />
-                {t("form.submit")}
+                {isSubmitting ? (language === "es" ? "Enviando..." : "Sending...") : t("form.submit")}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
+
+              {submitError ? (
+                <p className="text-[0.72rem] font-semibold leading-[1.5] text-red-600">
+                  {submitError}
+                </p>
+              ) : null}
 
               {!paymentConfirmed ? (
                 <p className="text-[0.72rem] leading-[1.5] text-muted-foreground">
