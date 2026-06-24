@@ -13,6 +13,7 @@ import { FAQ } from "@/components/faq"
 import { StudentOutcomes } from "@/components/student-outcomes"
 import { StudentTestimonials } from "@/components/student-testimonials"
 import { Footer } from "@/components/footer"
+import { FloatingConversionActions } from "@/components/floating-conversion-actions"
 
 export default function Home() {
   return (
@@ -31,7 +32,8 @@ export default function Home() {
           <ContactForm />
           <FAQ />
           <StudentTestimonials />
-        </main>
+              <FloatingConversionActions />
+    </main>
 
         <Footer />
       </div>

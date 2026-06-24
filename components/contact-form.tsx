@@ -359,6 +359,7 @@ export function ContactForm() {
   const [submitted, setSubmitted] = useState(false)
   const [countryDropdownOpen, setCountryDropdownOpen] = useState(false)
   const [paymentConfirmed, setPaymentConfirmed] = useState(false)
+  const [isFreeTrial, setIsFreeTrial] = useState(false)
   const [paymentLinkOpened, setPaymentLinkOpened] = useState(false)
   const [binancePaymentSelected, setBinancePaymentSelected] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -407,6 +408,21 @@ export function ContactForm() {
     const params = new URLSearchParams(window.location.search)
     const plan = params.get("plan")
     const service = params.get("service")
+    const isFreeTrialRequest = service === "free-trial"
+
+    setIsFreeTrial(isFreeTrialRequest)
+
+    if (isFreeTrialRequest) {
+      setForm((current) => ({
+        ...current,
+        service: t("form.service.spanish"),
+        selectedPlan: "",
+      }))
+      setPaymentConfirmed(false)
+      setPaymentLinkOpened(false)
+      setBinancePaymentSelected(false)
+      return
+    }
 
     if (plan && plan in lessonPlans) {
       setForm((current) => ({
@@ -720,11 +736,11 @@ export function ContactForm() {
       : "Not provided"
 
   const mailBody = [
-    `Service: ${form.service}`,
-    paymentSummary ? `Selected product: ${paymentSummary.name}` : null,
-    paymentSummary ? `Price: ${formatPrice(paymentSummary.price, form.paymentCurrency)}` : null,
-    `Currency: ${selectedPaymentCurrency}`,
-    `Payment method: ${selectedPaymentMethod}`,
+    `Service: ${isFreeTrial ? "Free trial class" : form.service}`,
+    isFreeTrial ? "Selected product: Free trial class" : paymentSummary ? `Selected product: ${paymentSummary.name}` : null,
+    isFreeTrial ? "Price: Free" : paymentSummary ? `Price: ${formatPrice(paymentSummary.price, form.paymentCurrency)}` : null,
+    isFreeTrial ? null : `Currency: ${selectedPaymentCurrency}`,
+    isFreeTrial ? null : `Payment method: ${selectedPaymentMethod}`,
     `Full name: ${form.fullName}`,
     `Email: ${form.email}`,
     `Country of residence: ${form.country || "Not provided"}`,
@@ -747,13 +763,17 @@ export function ContactForm() {
     .filter((item): item is string => item !== null)
     .join("\n")
 
-  const emailSubject = isLive
+  const emailSubject = isFreeTrial
     ? language === "es"
-      ? "Interpretación en Tiempo Real — Formulario de Solicitud"
-      : "Real-Time Interpretation Services — Request Form"
-    : "SPANISH ACADEMY – STUDENT INTAKE FORM"
+      ? "Spanish Academy — Solicitud de clase gratis"
+      : "Spanish Academy — Free Trial Class Request"
+    : isLive
+      ? language === "es"
+        ? "Interpretación en Tiempo Real — Formulario de Solicitud"
+        : "Real-Time Interpretation Services — Request Form"
+      : "SPANISH ACADEMY – STUDENT INTAKE FORM"
 
-  const canSubmit = Boolean(paymentSummary) && paymentConfirmed
+  const canSubmit = isFreeTrial || (Boolean(paymentSummary) && paymentConfirmed)
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -1042,7 +1062,7 @@ export function ContactForm() {
                 </p>
               </section>
 
-              {!isLive ? (
+              {!isLive && !isFreeTrial ? (
                 <>
                   <section className="grid min-w-0 gap-4 md:grid-cols-2">
                     <div className="min-w-0 md:col-span-2">
@@ -1620,9 +1640,25 @@ export function ContactForm() {
                 )
               )}
 
+              {isFreeTrial ? (
+                <section className="min-w-0 rounded-[1rem] bg-[var(--surface-soft)] p-4 ring-1 ring-border/70 sm:p-5">
+                  <p className="fine-label">05</p>
+
+                  <h3 className="mt-1 break-words font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary sm:text-[1.35rem]">
+                    {language === "es" ? "Clase gratis seleccionada" : "Free class selected"}
+                  </h3>
+
+                  <p className="mt-2 max-w-[70ch] text-[0.78rem] leading-[1.6] text-muted-foreground">
+                    {language === "es"
+                      ? "No necesitás completar ningún pago para enviar esta solicitud. El equipo de Spanish Academy va a contactarte para coordinar tu clase gratis."
+                      : "No payment is required to send this request. The Spanish Academy team will contact you to coordinate your free class."}
+                  </p>
+                </section>
+              ) : null}
+
               <section className="grid min-w-0 gap-4">
                 <div className="min-w-0">
-                  <p className="fine-label">{isLive ? "06" : "07"}</p>
+                  <p className="fine-label">{isFreeTrial ? "06" : isLive ? "06" : "07"}</p>
 
                   <h3 className="mt-1 break-words font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary sm:text-[1.35rem]">
                     {t("form.message.title")}
@@ -1659,7 +1695,7 @@ export function ContactForm() {
                 </p>
               ) : null}
 
-              {!paymentConfirmed ? (
+              {!isFreeTrial && !paymentConfirmed ? (
                 <p className="text-[0.72rem] leading-[1.5] text-muted-foreground">
                   {language === "es"
                     ? "Para enviar la solicitud, primero completá el pago y marcá la confirmación."
