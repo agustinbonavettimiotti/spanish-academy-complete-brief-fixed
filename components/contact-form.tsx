@@ -408,9 +408,22 @@ export function ContactForm() {
     const params = new URLSearchParams(window.location.search)
     const plan = params.get("plan")
     const service = params.get("service")
-    const isFreeTrialRequest = service === "free-trial"
+    const isFreeTrialRequest = service === "free-trial" && !(plan && plan in lessonPlans)
 
     setIsFreeTrial(isFreeTrialRequest)
+
+    if (plan && plan in lessonPlans) {
+      setIsFreeTrial(false)
+      setPaymentConfirmed(false)
+      setPaymentLinkOpened(false)
+      setBinancePaymentSelected(false)
+      setForm((current) => ({
+        ...current,
+        service: t("form.service.spanish"),
+        selectedPlan: plan,
+      }))
+      return
+    }
 
     if (isFreeTrialRequest) {
       setForm((current) => ({
@@ -422,14 +435,6 @@ export function ContactForm() {
       setPaymentLinkOpened(false)
       setBinancePaymentSelected(false)
       return
-    }
-
-    if (plan && plan in lessonPlans) {
-      setForm((current) => ({
-        ...current,
-        service: t("form.service.spanish"),
-        selectedPlan: plan,
-      }))
     }
 
     if (service === "real-time-spanish-interpretation") {
@@ -451,14 +456,43 @@ export function ContactForm() {
     }
   }, [t])
 
+  useEffect(() => {
+    if (!isFreeTrial) return
+
+    setForm((current) => {
+      const lessonService =
+        current.service === t("form.service.english") || current.service === "English lessons"
+          ? t("form.service.english")
+          : t("form.service.spanish")
+
+      const firstAvailabilityEntry = Object.entries(current.availabilityByDay)[0]
+
+      return {
+        ...current,
+        service: lessonService,
+        selectedPlan: "",
+        liveLanguage: t("form.liveLanguage.spanish"),
+        availabilityByDay: firstAvailabilityEntry
+          ? { [firstAvailabilityEntry[0]]: firstAvailabilityEntry[1] }
+          : {},
+      }
+    })
+    setPaymentConfirmed(false)
+    setPaymentLinkOpened(false)
+    setBinancePaymentSelected(false)
+  }, [isFreeTrial, t])
+
   const selectedPlanData =
     form.selectedPlan && form.selectedPlan in lessonPlans
       ? lessonPlans[form.selectedPlan as LessonPlanKey]
       : null
 
   const services = useMemo(
-    () => [t("form.service.spanish"), t("form.service.english"), t("form.service.live")],
-    [t],
+    () =>
+      isFreeTrial
+        ? [t("form.service.spanish"), t("form.service.english")]
+        : [t("form.service.spanish"), t("form.service.english"), t("form.service.live")],
+    [isFreeTrial, t],
   )
 
   const levels = [
@@ -556,7 +590,7 @@ export function ContactForm() {
   ]
 
   const selectedDayRows = days.filter((day) => Object.prototype.hasOwnProperty.call(form.availabilityByDay, day.key))
-  const selectedDayLimit = selectedPlanData ? Math.min(selectedPlanData.lessonCount, days.length) : days.length
+  const selectedDayLimit = isFreeTrial ? 1 : selectedPlanData ? Math.min(selectedPlanData.lessonCount, days.length) : days.length
   const selectedDayCount = selectedDayRows.length
 
   const update = <K extends keyof IntakeForm>(key: K, value: IntakeForm[K]) => {
@@ -658,9 +692,10 @@ export function ContactForm() {
   }
 
   const isLive =
-    form.service === t("form.service.live") ||
-    form.service === "Real-time interpretation" ||
-    form.service.toLowerCase().includes("interpret")
+    !isFreeTrial &&
+    (form.service === t("form.service.live") ||
+      form.service === "Real-time interpretation" ||
+      form.service.toLowerCase().includes("interpret"))
 
   const isEnglishLesson = form.service === t("form.service.english") || form.service === "English lessons"
 
@@ -701,6 +736,8 @@ export function ContactForm() {
       }
     : selectedPlanData
 
+  const showPackagePayment = !isFreeTrial && !isLive
+
   const selectedAvailabilityRows = selectedDayRows.map((day) => {
     const selectedBlockKey = form.availabilityByDay[day.key]
     const block = timeBlocks.find((timeBlock) => timeBlock.key === selectedBlockKey) || null
@@ -736,8 +773,8 @@ export function ContactForm() {
       : "Not provided"
 
   const mailBody = [
-    `Service: ${isFreeTrial ? "Free trial class" : form.service}`,
-    isFreeTrial ? "Selected product: Free trial class" : paymentSummary ? `Selected product: ${paymentSummary.name}` : null,
+    `Service: ${isFreeTrial ? "Free trial lesson" : form.service}`,
+    isFreeTrial ? "Selected product: Free trial lesson" : paymentSummary ? `Selected product: ${paymentSummary.name}` : null,
     isFreeTrial ? "Price: Free" : paymentSummary ? `Price: ${formatPrice(paymentSummary.price, form.paymentCurrency)}` : null,
     isFreeTrial ? null : `Currency: ${selectedPaymentCurrency}`,
     isFreeTrial ? null : `Payment method: ${selectedPaymentMethod}`,
@@ -766,7 +803,7 @@ export function ContactForm() {
   const emailSubject = isFreeTrial
     ? language === "es"
       ? "Spanish Academy — Solicitud de clase gratis"
-      : "Spanish Academy — Free Trial Class Request"
+      : "Spanish Academy — Free Trial Lesson Request"
     : isLive
       ? language === "es"
         ? "Interpretación en Tiempo Real — Formulario de Solicitud"
@@ -1062,7 +1099,7 @@ export function ContactForm() {
                 </p>
               </section>
 
-              {!isLive && !isFreeTrial ? (
+              {!isLive ? (
                 <>
                   <section className="grid min-w-0 gap-4 md:grid-cols-2">
                     <div className="min-w-0 md:col-span-2">
@@ -1123,7 +1160,13 @@ export function ContactForm() {
                             {t("form.days.subtitle")}
                           </p>
 
-                          {selectedPlanData ? (
+                          {isFreeTrial ? (
+                            <p className="mt-2 min-h-[1.05rem] text-[0.72rem] leading-[1.45] text-muted-foreground">
+                              {language === "es"
+                                ? "Seleccioná 1 día disponible para tu lesson gratuita."
+                                : "Select 1 available day for your free lesson."}
+                            </p>
+                          ) : selectedPlanData ? (
                             <p className="mt-2 min-h-[1.05rem] text-[0.72rem] leading-[1.45] text-muted-foreground">
                               {language === "es"
                                 ? `Podés seleccionar hasta ${selectedDayLimit} día${selectedDayLimit === 1 ? "" : "s"} para este paquete.`
@@ -1359,7 +1402,7 @@ export function ContactForm() {
                 </section>
               )}
 
-              {!isLive ? (
+              {showPackagePayment ? (
                 <section className="min-w-0 rounded-[1rem] bg-[var(--surface-soft)] p-4 ring-1 ring-border/70 sm:p-5">
                   <p className="fine-label">06</p>
 
@@ -1642,23 +1685,23 @@ export function ContactForm() {
 
               {isFreeTrial ? (
                 <section className="min-w-0 rounded-[1rem] bg-[var(--surface-soft)] p-4 ring-1 ring-border/70 sm:p-5">
-                  <p className="fine-label">05</p>
+                  <p className="fine-label">06</p>
 
                   <h3 className="mt-1 break-words font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary sm:text-[1.35rem]">
-                    {language === "es" ? "Clase gratis seleccionada" : "Free class selected"}
+                    {language === "es" ? "Clase gratis seleccionada" : "Free lesson selected"}
                   </h3>
 
                   <p className="mt-2 max-w-[70ch] text-[0.78rem] leading-[1.6] text-muted-foreground">
                     {language === "es"
                       ? "No necesitás completar ningún pago para enviar esta solicitud. El equipo de Spanish Academy va a contactarte para coordinar tu clase gratis."
-                      : "No payment is required to send this request. The Spanish Academy team will contact you to coordinate your free class."}
+                      : "No payment is required to send this request. The Spanish Academy team will contact you to coordinate your free lesson."}
                   </p>
                 </section>
               ) : null}
 
               <section className="grid min-w-0 gap-4">
                 <div className="min-w-0">
-                  <p className="fine-label">{isFreeTrial ? "06" : isLive ? "06" : "07"}</p>
+                  <p className="fine-label">{isFreeTrial ? "07" : isLive ? "06" : "07"}</p>
 
                   <h3 className="mt-1 break-words font-serif text-[1.25rem] leading-[1.08] tracking-[-0.04em] text-primary sm:text-[1.35rem]">
                     {t("form.message.title")}
