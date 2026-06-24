@@ -16,19 +16,19 @@ export function StudentTestimonials() {
         {
           quote:
             "The classes helped me feel more confident speaking Spanish in everyday situations. Each lesson was adapted to my level, my schedule, and the situations I actually needed to handle.",
-          meta: "Spanish lessons",
+          meta: "Madison K., Colorado",
           detail: "Personalized learning",
         },
         {
           quote:
             "I liked that the lessons were clear, structured, and practical. The teacher focused on my real goals instead of following a generic program.",
-          meta: "Spanish Academy student",
+          meta: "Ethan M., New York",
           detail: "Goal-based lessons",
         },
         {
           quote:
             "The process was easy from the beginning. I could explain my availability, my level, and what I wanted to improve, and the academy matched me with the right teacher.",
-          meta: "Online student",
+          meta: "Sarah R., Melbourne",
           detail: "Teacher matching",
         },
       ],
@@ -42,19 +42,19 @@ export function StudentTestimonials() {
         {
           quote:
             "Las clases me ayudaron a sentirme con más seguridad al hablar español en situaciones cotidianas. Cada clase se adaptó a mi nivel, mis horarios y las situaciones reales que necesitaba resolver.",
-          meta: "Clases de español",
+          meta: "Madison K., Colorado",
           detail: "Aprendizaje personalizado",
         },
         {
           quote:
             "Me gustó que las clases fueran claras, ordenadas y prácticas. El profesor se enfocó en mis objetivos reales, no en un programa genérico.",
-          meta: "Estudiante de Spanish Academy",
+          meta: "Ethan M., New York",
           detail: "Clases basadas en objetivos",
         },
         {
           quote:
             "El proceso fue simple desde el inicio. Pude explicar mi disponibilidad, mi nivel y lo que quería mejorar, y la academia me asignó el profesor adecuado.",
-          meta: "Estudiante online",
+          meta: "Sarah R., Melbourne",
           detail: "Asignación de profesor",
         },
       ],
